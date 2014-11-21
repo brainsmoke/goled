@@ -9,6 +9,12 @@ import (
 	"post6.net/goled/vector"
 )
 
+const (
+	All = iota
+	Inside
+	Outside
+)
+
 type Fire2d struct {
 	width, height int
 	colorTab      [2048][3]byte
@@ -28,6 +34,7 @@ type Fire struct {
 	sinY            []float64
 	vmap            []int
 	phase, phaseMax int
+	whichLeds       int
 }
 
 func uintMin(a, b uint) uint {
@@ -114,7 +121,7 @@ func (a *Fire2d) Next() [][3]byte {
 	return a.buf[:]
 }
 
-func NewFire(leds []model.Led3D) (a *Fire) {
+func newFire(leds []model.Led3D, whichLeds int) (a *Fire) {
 
 	a = new(Fire)
 
@@ -140,8 +147,17 @@ func NewFire(leds []model.Led3D) (a *Fire) {
 
 	a.mix = a.fire.Next()
 	a.phase, a.phaseMax = 0, 4
+	a.whichLeds = whichLeds
 
 	return a
+}
+
+func NewFire(leds []model.Led3D) *Fire {
+	return newFire(leds, All)
+}
+
+func NewInnerFire(leds []model.Led3D) *Fire {
+	return newFire(leds, Inside)
 }
 
 func (a *Fire) Next() [][3]byte {
@@ -170,6 +186,8 @@ func (a *Fire) Next() [][3]byte {
 	}
 
 	for i := range a.buf {
+
+		if a.whichLeds == All || (i%5==4) == (a.whichLeds == Inside) {
 		if a.max[i] == 0 {
 			a.buf[i] = [3]byte{0, 0, 255}
 		} else {
@@ -180,6 +198,7 @@ func (a *Fire) Next() [][3]byte {
 		a.accum[i][0] = a.accum[i][0] * 7 / 8
 		a.accum[i][1] = a.accum[i][1] * 7 / 8
 		a.accum[i][2] = a.accum[i][2] * 7 / 8
+		}
 	}
 	return a.buf[:]
 }

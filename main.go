@@ -20,6 +20,7 @@ import (
 	"post6.net/goled/ani/shadowwalk"
 	"post6.net/goled/ani/snake"
 	"post6.net/goled/ani/topo"
+	"post6.net/goled/ani/uniform"
 	"post6.net/goled/ani/wobble"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
@@ -124,7 +125,7 @@ func main() {
 		addAni(onion.NewOnion(model.LedballSmooth()))
 	}
 	addAni(five.NewFive())
-	addAni(five.NewUniformInside())
+	addAni(uniform.NewUniformInside())
 
 	current, last := 0, -1
 	blendIter := 0

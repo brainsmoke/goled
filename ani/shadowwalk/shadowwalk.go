@@ -32,7 +32,7 @@ func NewShadowWalk(leds []model.Led3D) *ShadowWalk {
 		xRotMax:   500,
 		yRotMax:   2000,
 		zRotMax:   50000,
-		colorPlay: color.NewColorPlay(512, 3),
+		colorPlay: color.NewColorPlay(1024, 3),
 	}
 }
 

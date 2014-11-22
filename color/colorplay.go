@@ -29,7 +29,8 @@ func (c *ColorPlay) NextColor() [3]byte {
 	for i := range c.colors {
 		p := (c.phase + i*c.phaseMax/len(c.colors)) % c.phaseMax
 		if p == 0 {
-			c.colors[i] = [3]byte{byte(rand.Intn(256)), byte(rand.Intn(256)), byte(rand.Intn(256))}
+			c.colors[i] = HSIToRGB(rand.Float64(), 1, .5+rand.Float64()/2)
+//			c.colors[i] = [3]byte{byte(rand.Intn(256)), byte(rand.Intn(256)), byte(rand.Intn(256))}
 		}
 		r += int(c.colors[i][0]) * c.wave[p] / 256
 		g += int(c.colors[i][1]) * c.wave[p] / 256

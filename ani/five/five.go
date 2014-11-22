@@ -15,7 +15,7 @@ func NewFive() *Five {
 	t.buf = make([][3]byte, 300)
 
 	for i := range t.colors {
-		t.colors[i] = color.NewColorPlay(64*(3+i), 1)
+		t.colors[i] = color.NewColorPlay(128*(3+i), 1)
 	}
 
 	return t

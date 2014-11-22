@@ -32,7 +32,7 @@ func NewSnake() (s *Snake) {
 	s.state = make([]int, len(s.neighbours))
 	s.buf = make([][3]byte, len(s.neighbours))
 	s.newState = make([]int, len(s.neighbours))
-	s.colorPlay = color.NewColorPlay(128, 3)
+	s.colorPlay = color.NewColorPlay(256, 3)
 
 	return s
 }

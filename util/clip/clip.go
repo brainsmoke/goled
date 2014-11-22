@@ -11,6 +11,16 @@ func FloatToByte(f float64) byte {
 	}
 }
 
+func FloatBetween(f, min, max float64) float64 {
+	if f < min {
+		return min
+	} else if f < max {
+		return f
+	} else {
+		return max
+	}
+}
+
 func IntToByte(i int) byte {
 
 	if i > 255 {

@@ -1,4 +1,3 @@
-
 package color
 
 import (
@@ -10,7 +9,7 @@ var hsiTab [256]float64
 
 func init() {
 	for i := range hsiTab {
-		hsiTab[i] = math.Cos(math.Pi*2*float64(i)/768)/math.Cos(math.Pi*2*float64(128-i)/768)
+		hsiTab[i] = math.Cos(math.Pi*2*float64(i)/768) / math.Cos(math.Pi*2*float64(128-i)/768)
 	}
 }
 
@@ -26,15 +25,14 @@ func HSIToRGB(h, s, i float64) [3]byte {
 	iClip := clip.FloatBetween(i, 0, 1)
 
 	ix := hInt & 255
-	a := clip.FloatToByte(255*iClip*(1+sClip*hsiTab[ix])/3)
-	b := clip.FloatToByte(255*iClip*(1+sClip*(1-hsiTab[ix]))/3)
-	c := clip.FloatToByte(255*iClip*(1-sClip))
+	a := clip.FloatToByte(255 * iClip * (1 + sClip*hsiTab[ix]) / 3)
+	b := clip.FloatToByte(255 * iClip * (1 + sClip*(1-hsiTab[ix])) / 3)
+	c := clip.FloatToByte(255 * iClip * (1 - sClip))
 	if hInt < 256 {
-		return [3]byte{ a, b, c }
+		return [3]byte{a, b, c}
 	} else if hInt < 512 {
-		return [3]byte{ b, c, a }
+		return [3]byte{b, c, a}
 	} else {
-		return [3]byte{ c, a, b }
+		return [3]byte{c, a, b}
 	}
 }
-

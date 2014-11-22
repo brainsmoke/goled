@@ -4,8 +4,8 @@ import (
 	"flag"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
-	"time"
 	"strconv"
+	"time"
 )
 
 var gamma, brightness float64

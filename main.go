@@ -100,18 +100,31 @@ func main() {
 	addAni(snake.NewSnake())
 	addAni(fire.NewInnerFire(model.LedballSmooth()))
 	addAni(fire.NewFire(model.LedballSmooth()))
-	if !ambient { addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Outside)) }
+	if !ambient {
+		addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Outside))
+	}
 	addAni(cache.NewCachedAni(image.NewImageAni(model.LedballSmooth(), earth, 0, 0, 0), 300, 256))
 	addAni(shadowplay.NewShadowPlay(512, 3))
-	if !ambient { addAni(topo.NewTopo()) }
+	if !ambient {
+		addAni(topo.NewTopo())
+	}
 	addAni(orbit.NewOrbitAni(model.Ledball()))
-	if !ambient { addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Hard)) }
+	if !ambient {
+		addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Hard))
+	}
 	addAni(gameoflife.NewGameOfLife())
-	if !ambient { addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Smooth)) }
+	if !ambient {
+		addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Smooth))
+	}
 	addAni(shadowplay.NewShadowPlay(1024, 12))
-	if !ambient { addAni(radar.NewRadar(model.LedballSmooth())) }
-	if !ambient { addAni(onion.NewOnion(model.LedballSmooth())) }
+	if !ambient {
+		addAni(radar.NewRadar(model.LedballSmooth()))
+	}
+	if !ambient {
+		addAni(onion.NewOnion(model.LedballSmooth()))
+	}
 	addAni(five.NewFive())
+	addAni(five.NewUniformInside())
 
 	current, last := 0, -1
 	blendIter := 0

@@ -25,12 +25,12 @@ func (t *Five) Next() [][3]byte {
 
 	var colors [5][3]byte
 
-	for i := range colors{
+	for i := range colors {
 		colors[i] = t.colors[i].NextColor()
 	}
 
 	for i := range t.buf {
-		
+
 		t.buf[i] = colors[i%5]
 	}
 

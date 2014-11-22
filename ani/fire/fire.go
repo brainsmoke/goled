@@ -187,17 +187,17 @@ func (a *Fire) Next() [][3]byte {
 
 	for i := range a.buf {
 
-		if a.whichLeds == All || (i%5==4) == (a.whichLeds == Inside) {
-		if a.max[i] == 0 {
-			a.buf[i] = [3]byte{0, 0, 255}
-		} else {
-			a.buf[i][0] = clip.FloatToByte(a.accum[i][0] / a.max[i] / 8)
-			a.buf[i][1] = clip.FloatToByte(a.accum[i][1] / a.max[i] / 8)
-			a.buf[i][2] = clip.FloatToByte(a.accum[i][2] / a.max[i] / 8)
-		}
-		a.accum[i][0] = a.accum[i][0] * 7 / 8
-		a.accum[i][1] = a.accum[i][1] * 7 / 8
-		a.accum[i][2] = a.accum[i][2] * 7 / 8
+		if a.whichLeds == All || (i%5 == 4) == (a.whichLeds == Inside) {
+			if a.max[i] == 0 {
+				a.buf[i] = [3]byte{0, 0, 255}
+			} else {
+				a.buf[i][0] = clip.FloatToByte(a.accum[i][0] / a.max[i] / 8)
+				a.buf[i][1] = clip.FloatToByte(a.accum[i][1] / a.max[i] / 8)
+				a.buf[i][2] = clip.FloatToByte(a.accum[i][2] / a.max[i] / 8)
+			}
+			a.accum[i][0] = a.accum[i][0] * 7 / 8
+			a.accum[i][1] = a.accum[i][1] * 7 / 8
+			a.accum[i][2] = a.accum[i][2] * 7 / 8
 		}
 	}
 	return a.buf[:]

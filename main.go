@@ -29,9 +29,12 @@ import (
 )
 
 const (
-	next = iota
+	nop = iota
+	next
 	previous
 	quit
+	lock
+	unlock
 )
 
 func cmdHandler(file *os.File, events chan<- int) {
@@ -48,6 +51,10 @@ func cmdHandler(file *os.File, events chan<- int) {
 			events <- previous
 		case "quit":
 			events <- quit
+		case "lock":
+			events <- lock
+		case "unlock":
+			events <- unlock
 		}
 	}
 
@@ -74,6 +81,16 @@ func init() {
 	flag.Var(&ledOrder, "ledorder", "led order")
 }
 
+func nextTicker() *time.Ticker {
+	if switchTime == 0 {
+		t := time.NewTicker(time.Second * time.Duration(1000000))
+		t.Stop()
+		return t
+	} else {
+		return time.NewTicker(time.Second * time.Duration(switchTime))
+	}
+}
+
 func main() {
 
 	blendTime = 3
@@ -91,7 +108,7 @@ func main() {
 
 	tick := time.NewTicker(time.Second / time.Duration(fps))
 
-	nextAni := time.NewTicker(time.Second * time.Duration(switchTime))
+	nextAni := nextTicker()
 
 	baseDir := path.Dir(os.Args[0])
 	earth, _ := os.Open(baseDir + "/earth.png")
@@ -118,14 +135,15 @@ func main() {
 		addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Smooth))
 	}
 	addAni(shadowplay.NewShadowPlay(1024, 12))
+	addAni(five.NewFive())
 	if !ambient {
 		addAni(radar.NewRadar(model.LedballSmooth()))
 	}
 	if !ambient {
 		addAni(onion.NewOnion(model.LedballSmooth()))
 	}
-	addAni(five.NewFive())
 	addAni(uniform.NewUniformInside())
+	addAni(five.NewFiveWave(model.LedballSmooth()))
 
 	current, last := 0, -1
 	blendIter := 0
@@ -157,23 +175,38 @@ func main() {
 			blendIter = blendFrames
 
 		case e, more := <-events:
-			switch e {
-			case next:
-				current = (current + 1) % len(animations)
-				lastFrame, last = curFrame, -1
-				blendIter = blendFrames
-				nextAni.Stop()
-				nextAni = time.NewTicker(time.Second * time.Duration(switchTime))
-			case previous:
-				current = (current + len(animations) - 1) % len(animations)
-				lastFrame, last = curFrame, -1
-				blendIter = blendFrames
-				nextAni.Stop()
-				nextAni = time.NewTicker(time.Second * time.Duration(switchTime))
-			case quit:
-				os.Exit(0)
-			}
-			if !more {
+			if more {
+				switch e {
+				case next:
+					current = (current + 1) % len(animations)
+					lastFrame, last = curFrame, -1
+					blendIter = blendFrames
+					if nextAni.C != nil {
+						nextAni.Stop()
+						nextAni = nextTicker()
+
+					}
+				case previous:
+					current = (current + len(animations) - 1) % len(animations)
+					lastFrame, last = curFrame, -1
+					blendIter = blendFrames
+					if nextAni.C != nil {
+						nextAni.Stop()
+						nextAni = nextTicker()
+					}
+				case lock:
+					if nextAni.C != nil {
+						nextAni.Stop()
+						nextAni.C = nil
+					}
+				case unlock:
+					if nextAni.C == nil {
+						nextAni = nextTicker()
+					}
+				case quit:
+					os.Exit(0)
+				}
+			} else {
 				events = nil
 			}
 		}

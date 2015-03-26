@@ -13,14 +13,14 @@ import (
 	"post6.net/goled/ani/gameoflife"
 	"post6.net/goled/ani/gradient"
 	"post6.net/goled/ani/image"
-	"post6.net/goled/ani/onion"
+	//"post6.net/goled/ani/onion"
 	"post6.net/goled/ani/orbit"
 	"post6.net/goled/ani/radar"
 	"post6.net/goled/ani/shadowplay"
 	"post6.net/goled/ani/shadowwalk"
 	"post6.net/goled/ani/snake"
 	"post6.net/goled/ani/topo"
-	"post6.net/goled/ani/uniform"
+//	"post6.net/goled/ani/uniform"
 	"post6.net/goled/ani/wobble"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
@@ -64,7 +64,7 @@ func cmdHandler(file *os.File, events chan<- int) {
 var gamma, brightness float64
 var fps, switchTime, blendTime int
 var ledOrder led.LedOrder
-var ambient bool
+//var ambient bool
 var animations = []ani.Animation(nil)
 
 func addAni(a ani.Animation) {
@@ -76,7 +76,7 @@ func init() {
 	flag.Float64Var(&brightness, "brightness", 1., "used brighness setting")
 	flag.IntVar(&fps, "fps", 80, "frames per second")
 	flag.IntVar(&switchTime, "switchtime", 60, "seconds per animation")
-	flag.BoolVar(&ambient, "ambient", false, "don't load bright animations")
+//	flag.BoolVar(&ambient, "ambient", false, "don't load bright animations")
 	ledOrder = led.RGB
 	flag.Var(&ledOrder, "ledorder", "led order")
 }
@@ -114,35 +114,19 @@ func main() {
 	earth, _ := os.Open(baseDir + "/earth.png")
 
 	addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Inside))
-	addAni(shadowwalk.NewShadowWalk(model.LedballSmooth()))
-	addAni(snake.NewSnake())
-	addAni(fire.NewInnerFire(model.LedballSmooth()))
 	addAni(fire.NewFire(model.LedballSmooth()))
-	if !ambient {
-		addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Outside))
-	}
+	addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Outside))
+	addAni(snake.NewSnake())
 	addAni(cache.NewCachedAni(image.NewImageAni(model.LedballSmooth(), earth, 0, 0, 0), 300, 256))
+	addAni(shadowwalk.NewShadowWalk(model.LedballSmooth()))
 	addAni(shadowplay.NewShadowPlay(512, 3))
-	if !ambient {
-		addAni(topo.NewTopo())
-	}
+	addAni(topo.NewTopo())
 	addAni(orbit.NewOrbitAni(model.Ledball()))
-	if !ambient {
-		addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Hard))
-	}
+	addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Hard))
 	addAni(gameoflife.NewGameOfLife())
-	if !ambient {
-		addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Smooth))
-	}
-	addAni(shadowplay.NewShadowPlay(1024, 12))
+	addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Smooth))
 	addAni(five.NewFive())
-	if !ambient {
-		addAni(radar.NewRadar(model.LedballSmooth()))
-	}
-	if !ambient {
-		addAni(onion.NewOnion(model.LedballSmooth()))
-	}
-	addAni(uniform.NewUniformInside())
+	addAni(radar.NewRadar(model.LedballSmooth()))
 	addAni(five.NewFiveWave(model.LedballSmooth()))
 
 	current, last := 0, -1

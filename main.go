@@ -13,14 +13,14 @@ import (
 	"post6.net/goled/ani/gameoflife"
 	"post6.net/goled/ani/gradient"
 	"post6.net/goled/ani/image"
-	"post6.net/goled/ani/onion"
+	//"post6.net/goled/ani/onion"
 	"post6.net/goled/ani/orbit"
 	"post6.net/goled/ani/radar"
 	"post6.net/goled/ani/shadowplay"
 	"post6.net/goled/ani/shadowwalk"
 	"post6.net/goled/ani/snake"
 	"post6.net/goled/ani/topo"
-	"post6.net/goled/ani/uniform"
+//	"post6.net/goled/ani/uniform"
 	"post6.net/goled/ani/wobble"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
@@ -29,9 +29,12 @@ import (
 )
 
 const (
-	next = iota
+	nop = iota
+	next
 	previous
 	quit
+	lock
+	unlock
 )
 
 func cmdHandler(file *os.File, events chan<- int) {
@@ -48,6 +51,10 @@ func cmdHandler(file *os.File, events chan<- int) {
 			events <- previous
 		case "quit":
 			events <- quit
+		case "lock":
+			events <- lock
+		case "unlock":
+			events <- unlock
 		}
 	}
 
@@ -57,7 +64,7 @@ func cmdHandler(file *os.File, events chan<- int) {
 var gamma, brightness float64
 var fps, switchTime, blendTime int
 var ledOrder led.LedOrder
-var ambient bool
+//var ambient bool
 var animations = []ani.Animation(nil)
 
 func addAni(a ani.Animation) {
@@ -69,9 +76,19 @@ func init() {
 	flag.Float64Var(&brightness, "brightness", 1., "used brighness setting")
 	flag.IntVar(&fps, "fps", 80, "frames per second")
 	flag.IntVar(&switchTime, "switchtime", 60, "seconds per animation")
-	flag.BoolVar(&ambient, "ambient", false, "don't load bright animations")
+//	flag.BoolVar(&ambient, "ambient", false, "don't load bright animations")
 	ledOrder = led.RGB
 	flag.Var(&ledOrder, "ledorder", "led order")
+}
+
+func nextTicker() *time.Ticker {
+	if switchTime == 0 {
+		t := time.NewTicker(time.Second * time.Duration(1000000))
+		t.Stop()
+		return t
+	} else {
+		return time.NewTicker(time.Second * time.Duration(switchTime))
+	}
 }
 
 func main() {
@@ -91,41 +108,26 @@ func main() {
 
 	tick := time.NewTicker(time.Second / time.Duration(fps))
 
-	nextAni := time.NewTicker(time.Second * time.Duration(switchTime))
+	nextAni := nextTicker()
 
 	baseDir := path.Dir(os.Args[0])
 	earth, _ := os.Open(baseDir + "/earth.png")
 
 	addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Inside))
-	addAni(shadowwalk.NewShadowWalk(model.LedballSmooth()))
-	addAni(snake.NewSnake())
-	addAni(fire.NewInnerFire(model.LedballSmooth()))
 	addAni(fire.NewFire(model.LedballSmooth()))
-	if !ambient {
-		addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Outside))
-	}
+	addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Outside))
+	addAni(snake.NewSnake())
 	addAni(cache.NewCachedAni(image.NewImageAni(model.LedballSmooth(), earth, 0, 0, 0), 300, 256))
+	addAni(shadowwalk.NewShadowWalk(model.LedballSmooth()))
 	addAni(shadowplay.NewShadowPlay(512, 3))
-	if !ambient {
-		addAni(topo.NewTopo())
-	}
+	addAni(topo.NewTopo())
 	addAni(orbit.NewOrbitAni(model.Ledball()))
-	if !ambient {
-		addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Hard))
-	}
+	addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Hard))
 	addAni(gameoflife.NewGameOfLife())
-	if !ambient {
-		addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Smooth))
-	}
-	addAni(shadowplay.NewShadowPlay(1024, 12))
-	if !ambient {
-		addAni(radar.NewRadar(model.LedballSmooth()))
-	}
-	if !ambient {
-		addAni(onion.NewOnion(model.LedballSmooth()))
-	}
+	addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Smooth))
 	addAni(five.NewFive())
-	addAni(uniform.NewUniformInside())
+	addAni(radar.NewRadar(model.LedballSmooth()))
+	addAni(five.NewFiveWave(model.LedballSmooth()))
 
 	current, last := 0, -1
 	blendIter := 0
@@ -157,23 +159,38 @@ func main() {
 			blendIter = blendFrames
 
 		case e, more := <-events:
-			switch e {
-			case next:
-				current = (current + 1) % len(animations)
-				lastFrame, last = curFrame, -1
-				blendIter = blendFrames
-				nextAni.Stop()
-				nextAni = time.NewTicker(time.Second * time.Duration(switchTime))
-			case previous:
-				current = (current + len(animations) - 1) % len(animations)
-				lastFrame, last = curFrame, -1
-				blendIter = blendFrames
-				nextAni.Stop()
-				nextAni = time.NewTicker(time.Second * time.Duration(switchTime))
-			case quit:
-				os.Exit(0)
-			}
-			if !more {
+			if more {
+				switch e {
+				case next:
+					current = (current + 1) % len(animations)
+					lastFrame, last = curFrame, -1
+					blendIter = blendFrames
+					if nextAni.C != nil {
+						nextAni.Stop()
+						nextAni = nextTicker()
+
+					}
+				case previous:
+					current = (current + len(animations) - 1) % len(animations)
+					lastFrame, last = curFrame, -1
+					blendIter = blendFrames
+					if nextAni.C != nil {
+						nextAni.Stop()
+						nextAni = nextTicker()
+					}
+				case lock:
+					if nextAni.C != nil {
+						nextAni.Stop()
+						nextAni.C = nil
+					}
+				case unlock:
+					if nextAni.C == nil {
+						nextAni = nextTicker()
+					}
+				case quit:
+					os.Exit(0)
+				}
+			} else {
 				events = nil
 			}
 		}

@@ -153,42 +153,302 @@ var (
 	phi3 = phi * phi * phi
 )
 
-func RhombicosidodecahedronPoints() []Vector3 {
+func evenPermutations(x, y, z float64) []Vector3 {
+
+	return []Vector3{
+
+		{x, y, z},
+		{z, x, y},
+		{y, z, x},
+	}
+}
+
+func allPermutations(x, y, z float64) []Vector3 {
+
+	return []Vector3{
+
+		{x, y, z},
+		{x, z, y},
+		{y, x, z},
+		{y, z, x},
+		{z, x, y},
+		{z, y, x},
+	}
+}
+
+func signPermutations(x, y, z float64) []Vector3 {
 
 	p := []Vector3{}
 
-	for _, x := range []float64{-1, 1} {
-		for _, y := range []float64{-1, 1} {
-			for _, z := range []float64{-phi3, phi3} {
-				p = append(p, Vector3{x, y, z})
-				p = append(p, Vector3{z, x, y})
-				p = append(p, Vector3{y, z, x})
+	for _, sx := range []float64{ -x, x } {
+		for _, sy := range []float64{ -y, y } {
+			for _, sz := range []float64{ -z, z } {
+				p = append(p, Vector3{sx, sy, sz})
+				if z == -z {
+					break
+				}
+			}
+			if y == -y {
+				break
 			}
 		}
-	}
-
-	for _, x := range []float64{-phi2, phi2} {
-		for _, y := range []float64{-phi, phi} {
-			for _, z := range []float64{-2 * phi, 2 * phi} {
-				p = append(p, Vector3{x, y, z})
-				p = append(p, Vector3{z, x, y})
-				p = append(p, Vector3{y, z, x})
-			}
-		}
-	}
-
-	for _, x := range []float64{-2 - phi, 2 + phi} {
-		for _, z := range []float64{-phi2, phi2} {
-			p = append(p, Vector3{x, 0, z})
-			p = append(p, Vector3{z, x, 0})
-			p = append(p, Vector3{0, z, x})
+		if x == -x {
+			break
 		}
 	}
 
 	return p
 }
 
-func DeltoidalhexecontahedronFaces() []Face {
+func signEvenPermutations(x, y, z float64) []Vector3 {
 
-	return CatalanDualFaces(RhombicosidodecahedronPoints())
+	p := []Vector3{}
+
+	for _, v := range signPermutations(x, y, z) {
+		p = append(p, evenPermutations(v.X, v.Y, v.Z)...)
+	}
+
+	return p
 }
+
+func allSignPermutations(x, y, z float64) []Vector3 {
+
+	p := []Vector3{}
+
+	for _, v := range signPermutations(x, y, z) {
+		p = append(p, allPermutations(v.X, v.Y, v.Z)...)
+	}
+
+	return p
+}
+
+/* point lists */
+
+func TetrahedronPoints() []Vector3 {
+
+	return []Vector3 {
+		{ -1, 0, -1/math.Sqrt(2) },
+		{  1, 0, -1/math.Sqrt(2) },
+		{ -1, 0,  1/math.Sqrt(2) },
+		{  1, 0,  1/math.Sqrt(2) },
+	}
+}
+
+func CubePoints() []Vector3 {
+
+	return signPermutations(1, 1, 1)
+}
+
+func IcosahedronPoints() []Vector3 {
+
+	return signEvenPermutations(0, 1, phi)
+}
+
+func TruncatedTetrahedronPoints() []Vector3 {
+
+	p := []Vector3{}
+
+	p = append(p, evenPermutations( 3,  1,  1)...)
+	p = append(p, evenPermutations( 3, -1, -1)...)
+	p = append(p, evenPermutations(-3,  1, -1)...)
+	p = append(p, evenPermutations(-3, -1,  1)...)
+
+	return p
+}
+
+func TruncatedCubePoints() []Vector3 {
+
+	return signEvenPermutations( math.Sqrt(2)-1, 1, 1 )
+}
+
+func TruncatedCuboctahedronPoints() []Vector3 {
+
+	return allSignPermutations(1, 1+math.Sqrt(2), 1+2*math.Sqrt(2))
+}
+
+func TruncatedOctahedronPoints() []Vector3 {
+
+	return allSignPermutations(0, 1, 2)
+}
+
+func TruncatedDodecahedronPoints() []Vector3 {
+
+	p := []Vector3{}
+
+	p = append(p, signEvenPermutations(0, 1/phi, 2+phi)...)
+	p = append(p, signEvenPermutations(1/phi, phi, 2*phi)...)
+	p = append(p, signEvenPermutations(phi, 2, phi2)...)
+
+	return p
+}
+
+func TruncatedIcosidodecahedronPoints() []Vector3 {
+
+	p := []Vector3{}
+
+	p = append(p, signEvenPermutations(1/phi, 1/phi, 3+phi)...)
+	p = append(p, signEvenPermutations(2/phi, phi, 1+2*phi)...)
+	p = append(p, signEvenPermutations(1/phi, phi2, -1+3*phi)...)
+	p = append(p, signEvenPermutations(-1+2*phi, 2, 2+phi)...)
+	p = append(p, signEvenPermutations(phi, 3, 2*phi)...)
+
+	return p
+}
+
+func TruncatedIcosahedronPoints() []Vector3 {
+
+	p := []Vector3{}
+
+	p = append(p, signEvenPermutations(2, 1+2*phi, phi)...)
+	p = append(p, signEvenPermutations(1, 2+phi, 2*phi)...)
+	p = append(p, signEvenPermutations(1, 3*phi, 0)...)
+
+	return p
+}
+
+func CuboctahedronPoints() []Vector3 {
+
+	return signEvenPermutations( 1, 0, 0 )
+}
+
+func IcosidodecahedronPoints() []Vector3 {
+
+	p := []Vector3{}
+
+	p = append(p, signEvenPermutations(phi, 0, 0)...)
+	p = append(p, signEvenPermutations(.5, phi/2, (1+phi)/2)...)
+
+	return p
+}
+
+
+func RhombicuboctahedronPoints() []Vector3 {
+	return signEvenPermutations(1, 1, 1+math.Sqrt(2))
+}
+
+func RhombicosidodecahedronPoints() []Vector3 {
+
+	p := []Vector3{}
+
+	p = append(p, signEvenPermutations(1, 1, phi3)...)
+	p = append(p, signEvenPermutations(phi2, phi, 2*phi)...)
+	p = append(p, signEvenPermutations(2+phi, 0, phi2)...)
+
+	return p
+}
+
+func SnubCubePoints() []Vector3 {
+
+	p := []Vector3{}
+
+	xi := ( math.Pow( 17.+3.*math.Sqrt(33.), 1./3.) -
+            math.Pow(-17.+3.*math.Sqrt(33.), 1./3.) - 1.) / 3.
+
+	evenPlusses := [...]Vector3 {
+		{-1,-1,-1 },
+		{ 1, 1,-1 },
+		{ 1,-1, 1 },
+		{-1, 1, 1 },
+	}
+
+	coords := [...]Vector3 {
+		{ 1, xi, 1/xi },
+		{-xi, -1, -1/xi },
+	}
+
+	for _, s := range evenPlusses {
+		for _, c := range coords {
+			p = append(p, evenPermutations(s.X*c.X, s.Y*c.Y, s.Z*c.Z)...)
+		}
+	}
+
+	return p
+}
+func SnubDodecahedronPoints() []Vector3 {
+
+	p := []Vector3{}
+
+	xi := ( math.Pow(phi/2.+math.Sqrt(phi-(5./27.))/2., 1./3.) +
+	        math.Pow(phi/2.-math.Sqrt(phi-(5./27.))/2., 1./3.) )
+
+	a := xi - 1/xi
+	b := xi*phi + phi2 + phi/xi
+
+	evenPlusses := [...]Vector3 {
+		{-1,-1,-1 },
+		{ 1, 1,-1 },
+		{ 1,-1, 1 },
+		{-1, 1, 1 },
+	}
+
+	coords := [...]Vector3 {
+		{ 2*a, 2, 2*b },
+		{ (a + b/phi + phi),    (-a*phi + b + 1/phi), (a/phi + b*phi - 1) },
+        { (-a/phi + b*phi + 1), (-a + b/phi - phi),   (a*phi + b - 1/phi) },
+        { (-a/phi + b*phi - 1), ( a - b/phi - phi),   (a*phi + b + 1/phi) },
+        { (a + b/phi - phi),    (a*phi - b + 1/phi),  (a/phi + b*phi + 1) },
+	}
+
+	for _, s := range evenPlusses {
+		for _, c := range coords {
+			p = append(p, evenPermutations(s.X*c.X, s.Y*c.Y, s.Z*c.Z)...)
+		}
+	}
+
+	return p
+}
+
+/* Catalan solids */
+
+func TriakisTetrahedronFaces() []Face { /*  kT */
+    return CatalanDualFaces(TruncatedTetrahedronPoints())
+}
+
+func TriakisOctahedronFaces() []Face { /*  kO */
+    return CatalanDualFaces(TruncatedCubePoints())
+}
+
+func DisdyakisDodecahedronFaces() []Face { /*  mC */
+    return CatalanDualFaces(TruncatedCuboctahedronPoints())
+}
+
+func TetrakisHexahedronFaces() []Face { /*  kC */
+    return CatalanDualFaces(TruncatedOctahedronPoints())
+}
+
+func TriakisIcosahedronFaces() []Face { /*  kI */
+    return CatalanDualFaces(TruncatedDodecahedronPoints())
+}
+
+func DisdyakisTriacontahedronFaces() []Face { /*  mD */
+    return CatalanDualFaces(TruncatedIcosidodecahedronPoints())
+}
+
+func PentakisDodecahedronFaces() []Face { /*  kD */
+    return CatalanDualFaces(TruncatedIcosahedronPoints())
+}
+
+func RhombicDodecahedronFaces() []Face { /*  jC */
+    return CatalanDualFaces(CuboctahedronPoints())
+}
+
+func RhombicTriacontahedronFaces() []Face { /*  jD */
+    return CatalanDualFaces(IcosidodecahedronPoints())
+}
+
+func DeltoidalIcositetrahedronFaces() []Face { /*  oC */
+    return CatalanDualFaces(RhombicuboctahedronPoints())
+}
+
+func DeltoidalHexecontahedronFaces() []Face { /*  oD */
+    return CatalanDualFaces(RhombicosidodecahedronPoints())
+}
+
+func PentagonalIcositetrahedronFaces() []Face { /*  gC */
+    return CatalanDualFaces(SnubCubePoints())
+}
+
+func PentagonalHexecontahedronFaces() []Face { /*  gD */
+    return CatalanDualFaces(SnubDodecahedronPoints())
+}
+

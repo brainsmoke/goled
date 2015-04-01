@@ -9,3 +9,8 @@ type Led3D struct {
 	Face             int
 	Inside           bool
 }
+
+type Led2D struct {
+	X, Y   float64
+	Inside bool
+}

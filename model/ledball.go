@@ -118,7 +118,7 @@ var ledballFaces []polyhedron.Face
 func LedballFaces() []polyhedron.Face {
 
 	if !ledballFacesCached {
-		ledballFaces = remapFaces(polyhedron.DeltoidalhexecontahedronFaces())
+		ledballFaces = remapFaces(polyhedron.DeltoidalHexecontahedronFaces())
 		ledballFacesCached = true
 	}
 	return append([]polyhedron.Face(nil), ledballFaces...)

@@ -74,3 +74,25 @@ func (v Vector3) String() string {
 
 	return fmt.Sprintf("(%.5f, %.5f, %.5f)", v.X, v.Y, v.Z)
 }
+
+func Sum(vList []Vector3) Vector3 {
+
+	v := Vector3{0,0,0}
+
+	for i := range vList {
+		v = v.Add(vList[i])
+	}
+	return v
+}
+
+func Average(vList []Vector3) Vector3 {
+
+	v := Sum(vList)
+
+	if len(vList) > 0 {
+		v = v.Mul(1/float64(len(vList)))
+	}
+
+	return v
+}
+

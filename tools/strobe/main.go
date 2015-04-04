@@ -10,12 +10,14 @@ import (
 
 var gamma, brightness float64
 var ledOrder led.LedOrder
+var fps float64
 
 func init() {
 	flag.Float64Var(&gamma, "gamma", 1, "used gamma correction setting")
 	flag.Float64Var(&brightness, "brightness", 1., "used brighness setting")
 	ledOrder = led.RGB
 	flag.Var(&ledOrder, "ledorder", "led order")
+	flag.Float64Var(&fps, "fps", 25, "frames per second")
 }
 
 func main() {
@@ -56,7 +58,7 @@ func main() {
 		frame2[i] = [3]byte{byte(rin), byte(gin), byte(bin)}
 	}
 
-	t := time.Tick(40 * time.Millisecond)
+	t := time.Tick(time.Duration(float64(time.Second) / fps))
 
 	for {
 		<-t

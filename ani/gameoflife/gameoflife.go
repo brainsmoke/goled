@@ -8,20 +8,20 @@ import (
 
 type GameOfLife struct {
 	colorPlay       *color.ColorPlay
-	neighbours      [][4]int
+	neighbours      [][]int
 	state, newState []int
 	phase, phaseMax int
 	iter, iterMax   int
 	buf             [][3]byte
 }
 
-func NewGameOfLife() (g *GameOfLife) {
+func NewGameOfLife(m *model.Model3D) (g *GameOfLife) {
 
 	g = new(GameOfLife)
 	g.phaseMax = 32
 	g.iterMax = 64
 
-	g.neighbours = model.LedballLedNeighbours()
+	g.neighbours = m.Neighbours
 
 	g.state = make([]int, len(g.neighbours))
 	g.buf = make([][3]byte, len(g.neighbours))

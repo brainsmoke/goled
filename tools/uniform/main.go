@@ -6,6 +6,7 @@ import (
 	"post6.net/goled/ani/uniform"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
+	"post6.net/goled/model/polyhedrone"
 	"time"
 )
 
@@ -27,13 +28,15 @@ func main() {
 
 	flag.Parse()
 
-	strip := led.NewLedStrip(300, ledOrder, gamma, brightness)
+	model := polyhedrone.Ledball()
+
+	strip := led.NewLedStrip(len(model.Leds), ledOrder, gamma, brightness)
 	out := drivers.LedDriver()
 	var animation ani.Animation
 	if all {
-		animation = uniform.NewUniform()
+		animation = uniform.NewUniform(model.Leds)
 	} else {
-		animation = uniform.NewUniformInside()
+		animation = uniform.NewUniformInside(model.Leds)
 	}
 
 	t := time.Tick(time.Second / time.Duration(fps))

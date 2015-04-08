@@ -125,7 +125,7 @@ func newFire(leds []model.Led3D, whichLeds int) (a *Fire) {
 
 	a = new(Fire)
 
-	a.fire = NewFire2d(40, 20)
+	a.fire = NewFire2d(41, 20)
 
 	points := make([]vector.Vector3, len(leds))
 

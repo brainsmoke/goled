@@ -8,7 +8,7 @@ import (
 
 type Snake struct {
 	colorPlay       *color.ColorPlay
-	neighbours      [][4]int
+	neighbours      [][]int
 	state, newState []int
 	phase, phaseMax int
 	buf             [][3]byte
@@ -16,7 +16,7 @@ type Snake struct {
 	dir, len, pos   int
 }
 
-func NewSnake() (s *Snake) {
+func NewSnake(m *model.Model3D) (s *Snake) {
 
 	s = new(Snake)
 	s.phaseMax = 20
@@ -27,7 +27,7 @@ func NewSnake() (s *Snake) {
 	}
 	s.snake[0] = 4
 
-	s.neighbours = model.LedballLedNeighbours()
+	s.neighbours = m.Neighbours
 
 	s.state = make([]int, len(s.neighbours))
 	s.buf = make([][3]byte, len(s.neighbours))

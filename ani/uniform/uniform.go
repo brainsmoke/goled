@@ -2,38 +2,45 @@ package uniform
 
 import (
 	"post6.net/goled/color"
+	"post6.net/goled/model"
 )
 
 type Uniform struct {
 	colorPlay *color.ColorPlay
 	buf       [][3]byte
-	inside    bool
+	use       []bool
 }
 
-func newUniform(inside bool) *Uniform {
+func newUniform(leds []model.Led3D, insideOnly bool) *Uniform {
+
+	use := make([]bool, len(leds))
+
+	for i := range use {
+		use[i] = leds[i].Inside || !insideOnly
+	}
 
 	return &Uniform{
-		buf:       make([][3]byte, 300),
+		buf:       make([][3]byte, len(leds)),
+		use:       use,
 		colorPlay: color.NewColorPlay(1024, 2),
-		inside:    inside,
 	}
 }
 
-func NewUniform() *Uniform {
+func NewUniform(leds []model.Led3D) *Uniform {
 
-	return newUniform(false)
+	return newUniform(leds, false)
 }
 
-func NewUniformInside() *Uniform {
+func NewUniformInside(leds []model.Led3D) *Uniform {
 
-	return newUniform(true)
+	return newUniform(leds, true)
 }
 
 func (u *Uniform) Next() [][3]byte {
 
 	color := u.colorPlay.NextColor()
 	for i := range u.buf {
-		if !u.inside || i%5 == 4 {
+		if u.use[i] {
 			u.buf[i] = color
 		} else {
 			u.buf[i] = [3]byte{0, 0, 0}

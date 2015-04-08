@@ -67,7 +67,7 @@ func (s *LedStrip) calcGammaMap() {
 	}
 }
 
-func NewLedStrip(size, ledOrder LedOrder, gamma, brightness float64) (s *LedStrip) {
+func NewLedStrip(size int, ledOrder LedOrder, gamma, brightness float64) (s *LedStrip) {
 
 	if int(ledOrder) >= len(ledMap) {
 		panic("bad ledOrder value")

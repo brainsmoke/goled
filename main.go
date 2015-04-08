@@ -24,7 +24,7 @@ import (
 	"post6.net/goled/ani/wobble"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
-	"post6.net/goled/model"
+	"post6.net/goled/model/polyhedrone"
 	"time"
 )
 
@@ -97,7 +97,10 @@ func main() {
 
 	flag.Parse()
 
-	strip := led.NewLedStrip(300, ledOrder, gamma, brightness)
+	ball := polyhedrone.Ledball()
+	smooth := ball.Smooth()
+
+	strip := led.NewLedStrip(len(ball.Leds), ledOrder, gamma, brightness)
 
 	in := os.Stdin
 	out := drivers.LedDriver()
@@ -113,21 +116,21 @@ func main() {
 	baseDir := path.Dir(os.Args[0])
 	earth, _ := os.Open(baseDir + "/earth.png")
 
-	addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Inside))
-	addAni(fire.NewFire(model.LedballSmooth()))
-	addAni(wobble.NewWobble(model.LedballSmooth(), wobble.Outside))
-	addAni(snake.NewSnake())
-	addAni(cache.NewCachedAni(image.NewImageAni(model.LedballSmooth(), earth, 0, 0, 0), 300, 256))
-	addAni(shadowwalk.NewShadowWalk(model.LedballSmooth()))
-	addAni(shadowplay.NewShadowPlay(512, 3))
-	addAni(topo.NewTopo())
-	addAni(orbit.NewOrbitAni(model.Ledball()))
-	addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Hard))
-	addAni(gameoflife.NewGameOfLife())
-	addAni(gradient.NewGradient(model.LedballSmooth(), gradient.Smooth))
-	addAni(five.NewFive())
-	addAni(radar.NewRadar(model.LedballSmooth()))
-	addAni(five.NewFiveWave(model.LedballSmooth()))
+	addAni(wobble.NewWobble(smooth.Leds, wobble.Inside))
+	addAni(fire.NewFire(smooth.Leds))
+	addAni(wobble.NewWobble(ball.Leds, wobble.Outside))
+	addAni(snake.NewSnake(ball))
+	addAni(cache.NewCachedAni(image.NewImageAni(smooth.Leds, earth, 0, 0, 0), len(smooth.Leds), 256))
+	addAni(shadowwalk.NewShadowWalk(smooth.Leds))
+	addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 3))
+	addAni(topo.NewTopo(ball))
+	addAni(orbit.NewOrbitAni(ball.Leds))
+	addAni(gradient.NewGradient(smooth.Leds, gradient.Hard))
+	addAni(gameoflife.NewGameOfLife(ball))
+	addAni(gradient.NewGradient(smooth.Leds, gradient.Smooth))
+	addAni(five.NewFive(ball.Leds))
+	addAni(radar.NewRadar(smooth.Leds))
+	addAni(five.NewFiveWave(smooth.Leds))
 
 	current, last := 0, -1
 	blendIter := 0

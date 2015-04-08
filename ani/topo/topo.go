@@ -9,83 +9,36 @@ import (
 type Topo struct {
 	phaseMax, phase int
 
-	groups [5][300]int
-	count  [5]int
+	groups [][]int
+	count  []int
 	wave   []int
 	buf    [][3]byte
 }
 
-func NewTopo() *Topo {
+func NewTopo(model *model.Model3D) *Topo {
 
 	t := new(Topo)
 
 	t.phaseMax = 10000
 
-	t.buf = make([][3]byte, 300)
+	t.buf = make([][3]byte, len(model.Leds))
+	t.groups = [][]int(nil)
+	t.count = []int(nil)
 
-	leds := model.LedballRaw()
-	faces := model.LedballFaces()
+	for _, v := range model.Groups {
+		max := 0
 
-	icosaedron := make([]int, 60)
-	dodecahedron := make([]int, 60)
-
-	for i := 0; i < 60; i++ {
-		icosaedron[i] = -1
-		dodecahedron[i] = -1
-	}
-
-	icoCount, dodeCount := 0, 0
-	for i := 0; i < 60; i++ {
-		if icosaedron[i] == -1 {
-
-			for j := i; icosaedron[j] == -1; j = faces[j].Neighbours[model.TopLeft] {
-				icosaedron[j] = icoCount
+		for _, num := range v {
+			if num > max {
+				max = num
 			}
-			icoCount++
 		}
-		if dodecahedron[i] == -1 {
 
-			for j := i; dodecahedron[j] == -1; j = faces[j].Neighbours[model.BottomLeft] {
-				dodecahedron[j] = dodeCount
-			}
-			dodeCount++
-		}
-	}
-
-	rhombCount := icoCount + dodeCount
-	for i, l := range leds {
-
-		f := l.Face
-		t.groups[0][i] = icosaedron[f]
-		t.groups[1][i] = f
-		t.groups[2][i] = dodecahedron[f]
-		if i%5 == 0 {
-			t.groups[3][i] = icosaedron[f]
-		} else if i%5 == 2 {
-			t.groups[3][i] = icoCount + dodecahedron[f]
-		} else if i%5 == 1 && t.groups[3][i] == 0 {
-
-			topRight := faces[f].Neighbours[model.TopRight]
-			bottomRight := faces[f].Neighbours[model.BottomRight]
-			opposite := faces[topRight].Neighbours[model.BottomLeft]
-
-			t.groups[3][i] = rhombCount
-			t.groups[3][5*topRight+3] = rhombCount
-			t.groups[3][5*opposite+1] = rhombCount
-			t.groups[3][5*bottomRight+3] = rhombCount
-
-			rhombCount++
-		}
-		t.groups[4][i] = i % 5
+		t.groups = append(t.groups, v)
+		t.count = append(t.count, max+1)
 	}
 
 	t.wave = make([]int, t.phaseMax)
-
-	t.count[0] = icoCount
-	t.count[1] = len(faces)
-	t.count[2] = dodeCount
-	t.count[4] = 5
-	t.count[3] = rhombCount
 
 	part := t.phaseMax / len(t.count)
 	slope := part / 5

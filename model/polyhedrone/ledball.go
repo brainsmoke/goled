@@ -1,7 +1,7 @@
-package model
+package polyhedrone
 
 import (
-	"math"
+	"post6.net/goled/model"
 	"post6.net/goled/polyhedron"
 )
 
@@ -20,7 +20,7 @@ const (
 	LedInside = 4
 )
 
-var traversal = [...]int{
+var traversal = polyhedron.RemapRoute{
 
 	BottomLeft, TopLeft,
 	TopLeft,
@@ -59,34 +59,10 @@ var faceTraversal = [...]struct {
 	{.04, .40, true},   // inside
 }
 
-func remapFaces(faces []polyhedron.Face) []polyhedron.Face {
-
-	newFaces := make([]polyhedron.Face, len(faces))
-	mapping := make([]int, len(faces))
-
-	current := 0
-
-	for i := range newFaces {
-
-		newFaces[i] = faces[current]
-		mapping[current] = i
-		current = faces[current].Neighbours[traversal[i]]
-	}
-
-	for i := range newFaces {
-		for j, k := range newFaces[i].Neighbours {
-
-			newFaces[i].Neighbours[j] = mapping[k]
-		}
-	}
-
-	return newFaces
-}
-
-func faceLeds(f polyhedron.Face, index int) []Led3D {
+func faceLeds(f polyhedron.Face, index int) []model.Led3D {
 
 	top, left, bottom, right := f.Polygon[0], f.Polygon[1], f.Polygon[2], f.Polygon[3]
-	leds := make([]Led3D, len(faceTraversal))
+	leds := make([]model.Led3D, len(faceTraversal))
 
 	for i, p := range faceTraversal {
 
@@ -97,40 +73,22 @@ func faceLeds(f polyhedron.Face, index int) []Led3D {
 		if p.inside {
 			normal = normal.Mul(-1)
 		}
-		leds[i] = Led3D{pos, normal, index, p.inside}
+		leds[i] = model.Led3D{pos, normal, index, p.inside}
 	}
 
 	return leds
 }
 
-var ledballRawCached = false
-var ledballRaw []Led3D
+func ledNeighbours(faces []polyhedron.Face) [][]int {
 
-var ledballCached = false
-var ledball []Led3D
-
-var ledballSmoothCached = false
-var ledballSmooth []Led3D
-
-var ledballFacesCached = false
-var ledballFaces []polyhedron.Face
-
-func LedballFaces() []polyhedron.Face {
-
-	if !ledballFacesCached {
-		ledballFaces = remapFaces(polyhedron.DeltoidalHexecontahedronFaces())
-		ledballFacesCached = true
-	}
-	return append([]polyhedron.Face(nil), ledballFaces...)
-}
-
-func LedballLedNeighbours() [][4]int {
-
-	neighbourList := make([][4]int, 300)
-
-	faces := LedballFaces()
+	neighbourList := make([][]int, 300)
 
 	for i, f := range faces {
+
+		for j := i*5 ; j < (i+1)*5 ; j++ {
+			neighbourList[j] = make([]int, 4)
+		}
+
 		tl, tr := f.Neighbours[TopLeft], f.Neighbours[TopRight]
 		bl, br := f.Neighbours[BottomLeft], f.Neighbours[BottomRight]
 
@@ -163,64 +121,100 @@ func LedballLedNeighbours() [][4]int {
 	return neighbourList
 }
 
-func LedballRaw() []Led3D {
+func ledGroups(leds []model.Led3D, faces []polyhedron.Face) map[string][]int {
 
-	if !ledballRawCached {
+	groups := make(map[string][]int)
 
-		ledballRaw = make([]Led3D, 300)
-		poly := LedballFaces()
+	groups["icosaedron"] = make([]int, len(leds))
+	groups["dodecahedron"] = make([]int, len(leds))
+	groups["faces"] = make([]int, len(leds))
+	groups["rhomb"] = make([]int, len(leds))
+	groups["leds"] = make([]int, len(leds))
 
-		for i, f := range poly {
+	icosaedron := make([]int, 60)
+	dodecahedron := make([]int, 60)
 
-			copy(ledballRaw[i*5:i*5+5], faceLeds(f, i))
-		}
-
-		ledballRawCached = true
+	for i := 0; i < 60; i++ {
+		icosaedron[i] = -1
+		dodecahedron[i] = -1
 	}
 
-	return append([]Led3D(nil), ledballRaw...)
-}
+	icoCount, dodeCount := 0, 0
+	for i := 0; i < 60; i++ {
+		if icosaedron[i] == -1 {
 
-func Ledball() []Led3D {
-
-	if !ledballCached {
-
-		ledball = LedballRaw()
-
-		max := 0.
-		for _, p := range ledball {
-			max = math.Max(max, p.Position.Magnitude())
-		}
-
-		for i := range ledball {
-			ledball[i].Position = ledball[i].Position.Mul(1. / max)
-		}
-
-		ledballCached = true
-	}
-
-	return append([]Led3D(nil), ledball...)
-}
-
-func LedballSmooth() []Led3D {
-
-	if !ledballSmoothCached {
-
-		ledballSmooth = LedballRaw()
-
-		for i := range ledball {
-			p := ledballSmooth[i].Position.Normalize()
-			ledballSmooth[i].Position = p
-
-			if ledballSmooth[i].Inside {
-				ledballSmooth[i].Normal = p.Mul(-1)
-			} else {
-				ledballSmooth[i].Normal = p
+			for j := i; icosaedron[j] == -1; j = faces[j].Neighbours[TopLeft] {
+				icosaedron[j] = icoCount
 			}
+			icoCount++
 		}
+		if dodecahedron[i] == -1 {
 
-		ledballSmoothCached = true
+			for j := i; dodecahedron[j] == -1; j = faces[j].Neighbours[BottomLeft] {
+				dodecahedron[j] = dodeCount
+			}
+			dodeCount++
+		}
 	}
 
-	return append([]Led3D(nil), ledballSmooth...)
+	rhombCount := icoCount + dodeCount
+	for i, l := range leds {
+
+		f := l.Face
+		groups["icosaedron"][i] = icosaedron[f]
+		groups["dodecahedron"][i] = f
+		groups["faces"][i] = dodecahedron[f]
+		if i%5 == 0 {
+			groups["rhomb"][i] = icosaedron[f]
+		} else if i%5 == 2 {
+			groups["rhomb"][i] = icoCount + dodecahedron[f]
+		} else if i%5 == 1 && groups["rhomb"][i] == 0 {
+
+			topRight := faces[f].Neighbours[TopRight]
+			bottomRight := faces[f].Neighbours[BottomRight]
+			opposite := faces[topRight].Neighbours[BottomLeft]
+
+			groups["rhomb"][i] = rhombCount
+			groups["rhomb"][5*topRight+3] = rhombCount
+			groups["rhomb"][5*opposite+1] = rhombCount
+			groups["rhomb"][5*bottomRight+3] = rhombCount
+
+			rhombCount++
+		}
+		groups["leds"][i] = i % 5
+	}
+
+	return groups
 }
+
+var ledball *model.Model3D
+
+func cacheLedball() {
+
+	ledball = new(model.Model3D)
+
+	faces := polyhedron.RemapFaces(polyhedron.DeltoidalHexecontahedronFaces(), 0, traversal)
+
+	ledball.Leds = make([]model.Led3D, 300)
+
+	for i, f := range faces {
+
+		copy(ledball.Leds[i*5:i*5+5], faceLeds(f, i))
+	}
+
+	ledball.Neighbours = ledNeighbours(faces)
+	ledball.Groups = ledGroups(ledball.Leds, faces)
+
+	ledball = ledball.UnitScale()
+}
+
+func Ledball() *model.Model3D {
+
+	return ledball.Copy()
+}
+
+func init() {
+
+	cacheLedball()
+}
+

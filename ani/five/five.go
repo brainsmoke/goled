@@ -13,10 +13,10 @@ type Five struct {
 	buf    [][3]byte
 }
 
-func NewFive() *Five {
+func NewFive(leds []model.Led3D) *Five {
 
 	t := new(Five)
-	t.buf = make([][3]byte, 300)
+	t.buf = make([][3]byte, len(leds))
 
 	for i := range t.colors {
 		t.colors[i] = color.NewColorPlay(128*(3+i), 1)
@@ -52,7 +52,7 @@ type FiveWave struct {
 func NewFiveWave(leds []model.Led3D) *FiveWave {
 
 	t := new(FiveWave)
-	t.buf = make([][3]byte, 300)
+	t.buf = make([][3]byte, len(leds))
 
 	for i := range t.colors {
 		t.colors[i] = color.NewColorPlay(128*(3+i), 3)

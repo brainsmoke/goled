@@ -4,6 +4,7 @@ import (
 	"math"
 	"math/rand"
 	"post6.net/goled/color"
+	"post6.net/goled/model"
 	"post6.net/goled/util/clip"
 )
 
@@ -15,9 +16,9 @@ type ShadowPlay struct {
 	buf             [][3]byte
 }
 
-func NewShadowPlay(phaseMax, nColors int) *ShadowPlay {
+func NewShadowPlay(leds []model.Led3D, phaseMax, nColors int) *ShadowPlay {
 
-	buf := make([][3]byte, 300)
+	buf := make([][3]byte, len(leds))
 
 	wave := make([]int, phaseMax)
 	colors := make([][3]byte, nColors)

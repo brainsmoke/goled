@@ -2,10 +2,11 @@ package main
 
 import (
 	"flag"
+	"time"
 	"post6.net/goled/ani/fire"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
-	"post6.net/goled/model"
+	"post6.net/goled/model/polyhedrone"
 )
 
 var gamma, brightness float64
@@ -26,9 +27,10 @@ func main() {
 
 	strip := led.NewLedStrip(300, ledOrder, gamma, brightness)
 	out := drivers.LedDriver()
-	animation := fire.NewFire(model.LedballSmooth())
 
-	t := time.Tick(time.Second / fps)
+	animation := fire.NewFire(polyhedrone.Ledball().Smooth().Leds)
+
+	t := time.Tick(time.Second / time.Duration(fps))
 
 	for {
 		<-t

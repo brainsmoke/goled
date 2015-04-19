@@ -2,6 +2,7 @@ package polyhedrone
 
 import (
 	"post6.net/goled/model"
+	"post6.net/goled/model/poly"
 	"post6.net/goled/polyhedron"
 )
 
@@ -19,6 +20,8 @@ const (
 	LedLeft   = 3
 	LedInside = 4
 )
+
+const innerRadius = 160
 
 var traversal = polyhedron.RemapRoute{
 
@@ -47,36 +50,34 @@ var traversal = polyhedron.RemapRoute{
 	BottomLeft, BottomLeft, TopLeft,
 }
 
-var faceTraversal = [...]struct {
-	x, y   float64
-	inside bool
-}{
+var ledPositions = []poly.FacePosition { // in mm, polygon point 0 defined as up, Center == (0, 0)
 
-	{.04, .17, false},  // top
-	{.27, .43, false},  // right
-	{0, .73, false},    // bottom
-	{-.25, .33, false}, // left
-	{.04, .40, true},   // inside
+	{   5.381,  30.860, false }, { -17.972,  21.880, false }, {  -1.531,  15.508, false }, /* top */
+	{  17.329,  16.047, false }, {  34.570,  13.711, false }, {  29.542,  -9.098, false }, /* right */
+	{  -4.494, -29.663, false }, {  12.749, -34.692, false }, {  -1.709, -49.329, false }, /* bottom */
+	{ -39.606,   8.504, false }, { -22.184,  -2.811, false }, { -22.633, -19.605, false }, /* right */
+	{   8.078,  20.266,  true }, { -30.715,   7.336,  true }, {  -3.954, -33.255,  true }, /* inside */
+
 }
 
-func faceLeds(f polyhedron.Face, index int) []model.Led3D {
+func polyhedronePositions() [][]poly.FacePosition {
 
-	top, left, bottom, right := f.Polygon[0], f.Polygon[1], f.Polygon[2], f.Polygon[3]
-	leds := make([]model.Led3D, len(faceTraversal))
+	list := []poly.FacePosition(nil)
 
-	for i, p := range faceTraversal {
+	for i:=0; i<len(ledPositions); i+=3 {
 
-		vY := bottom.Sub(top)
-		vX := right.Sub(left).Normalize().Mul(top.Distance(bottom))
-		pos := top.Add(vX.Mul(p.x)).Add(vY.Mul(p.y))
-		normal := f.Normal
-		if p.inside {
-			normal = normal.Mul(-1)
-		}
-		leds[i] = model.Led3D{pos, normal, index, p.inside}
+		a, b, c := ledPositions[i], ledPositions[i+1], ledPositions[i+2]
+
+		list = append(list, poly.FacePosition{ (a.X+b.X+c.X)/3., (a.Y+b.Y+c.Y)/3., a.Inside } )
 	}
 
-	return leds
+	facesList := make([][]poly.FacePosition, 60)
+
+	for i := range facesList {
+		facesList[i] = list
+	}
+
+	return facesList
 }
 
 func ledNeighbours(faces []polyhedron.Face) [][]int {
@@ -191,21 +192,14 @@ var ledball *model.Model3D
 
 func cacheLedball() {
 
-	ledball = new(model.Model3D)
-
 	faces := polyhedron.RemapFaces(polyhedron.DeltoidalHexecontahedronFaces(), 0, traversal)
+	factor := innerRadius / faces[0].Center.Magnitude()
+	faces = polyhedron.Scale(faces, factor)
 
-	ledball.Leds = make([]model.Led3D, 300)
-
-	for i, f := range faces {
-
-		copy(ledball.Leds[i*5:i*5+5], faceLeds(f, i))
-	}
-
+	ledball = new(model.Model3D)
+	ledball.Leds = poly.PopulateLeds(faces, polyhedronePositions())
 	ledball.Neighbours = ledNeighbours(faces)
 	ledball.Groups = ledGroups(ledball.Leds, faces)
-
-	ledball = ledball.UnitScale()
 }
 
 func Ledball() *model.Model3D {

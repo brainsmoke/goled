@@ -4,7 +4,7 @@ import (
     "fmt"
 	"os"
 	"post6.net/goled/model"
-	"post6.net/goled/model/polyhedrone"
+	"post6.net/goled/model/poly/polyhedrone"
     "io"
 )
 

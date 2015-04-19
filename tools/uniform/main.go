@@ -6,7 +6,7 @@ import (
 	"post6.net/goled/ani/uniform"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
-	"post6.net/goled/model/polyhedrone"
+	"post6.net/goled/model/poly/polyhedrone"
 	"time"
 )
 

@@ -6,7 +6,7 @@ import (
 	"post6.net/goled/ani/fire"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
-	"post6.net/goled/model/polyhedrone"
+	"post6.net/goled/model/poly/polyhedrone"
 )
 
 var gamma, brightness float64

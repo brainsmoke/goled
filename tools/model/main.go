@@ -2,8 +2,10 @@ package main
 
 import (
     "fmt"
+    "flag"
 	"os"
 	"post6.net/goled/model"
+	"post6.net/goled/model/poly/minipoly"
 	"post6.net/goled/model/poly/polyhedrone"
     "io"
 )
@@ -35,7 +37,19 @@ func writeModel(out io.Writer, leds []model.Led3D) {
 	fmt.Fprintf(out, "\t]\n}\n")
 }
 
-func main() {
+var modelName string
 
-	writeModel(os.Stdout, polyhedrone.Ledball().Leds)
+func main() {
+	flag.StringVar(&modelName, "model", "polyhedrone", "model name")
+	flag.Parse()
+
+	var m *model.Model3D
+
+	if modelName == "polyhedrone" {
+		m = polyhedrone.Ledball()
+	} else if modelName == "minipoly" {
+		m = minipoly.Ledball()
+	}
+
+	writeModel(os.Stdout, m.Leds)
 }

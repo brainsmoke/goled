@@ -98,6 +98,7 @@ func main() {
 	flag.Parse()
 
 	ball := polyhedrone.Ledball()
+	unitBall := ball.UnitScale()
 	smooth := ball.Smooth()
 
 	strip := led.NewLedStrip(len(ball.Leds), ledOrder, gamma, brightness)
@@ -118,13 +119,13 @@ func main() {
 
 	addAni(wobble.NewWobble(smooth.Leds, wobble.Inside))
 	addAni(fire.NewFire(smooth.Leds))
-	addAni(wobble.NewWobble(ball.Leds, wobble.Outside))
+	addAni(wobble.NewWobble(unitBall.Leds, wobble.Outside))
 	addAni(snake.NewSnake(ball))
 	addAni(cache.NewCachedAni(image.NewImageAni(smooth.Leds, earth, 0, 0, 0), len(smooth.Leds), 256))
 	addAni(shadowwalk.NewShadowWalk(smooth.Leds))
 	addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 3))
 	addAni(topo.NewTopo(ball))
-	addAni(orbit.NewOrbitAni(ball.Leds))
+	addAni(orbit.NewOrbitAni(unitBall.Leds))
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Hard))
 	addAni(gameoflife.NewGameOfLife(ball))
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Smooth))

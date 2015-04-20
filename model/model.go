@@ -48,7 +48,7 @@ func (m *Model3D) Scale(factor float64) *Model3D {
 	scaledModel := m.Copy()
 
 	for i := range scaledModel.Leds {
-		scaledModel.Leds[i].Position = scaledModel.Leds[i].Position.Mul(1. / factor)
+		scaledModel.Leds[i].Position = scaledModel.Leds[i].Position.Mul(factor)
 	}
 
 	return scaledModel

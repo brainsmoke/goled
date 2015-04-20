@@ -27,8 +27,8 @@ func populateFaceLeds(f polyhedron.Face, index int, ledPositions []FacePosition)
 			normal = normal.Mul(-1)
 		}
 		leds[i] = model.Led3D{pos, normal, index, p.Inside}
-print (p.X, p.Y, "\n")
-print (center.X, center.Y, center.Z, " ", pos.X, pos.Y, pos.Z, "\n")
+//print (p.X, p.Y, "\n")
+//print (center.X, center.Y, center.Z, " ", pos.X, pos.Y, pos.Z, "\n")
 	}
 
 	return leds

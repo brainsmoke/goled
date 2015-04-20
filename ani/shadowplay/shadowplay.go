@@ -40,7 +40,7 @@ func (t *ShadowPlay) Next() [][3]byte {
 	for i := range t.colors {
 		p := (t.phase + i*t.phaseMax/len(t.colors)) % t.phaseMax
 		if p == 0 {
-			t.indices[i] = rand.Intn(60)*5 + 4
+			t.indices[i] = rand.Intn(len(t.buf)/5)*5 + 4
 			//t.colors[i] = [3]byte{byte(rand.Intn(256)), byte(rand.Intn(256)), byte(rand.Intn(256))}
 			t.colors[i] = color.HSIToRGB(rand.Float64(), 1, rand.Float64())
 

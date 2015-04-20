@@ -24,6 +24,8 @@ import (
 	"post6.net/goled/ani/wobble"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
+	"post6.net/goled/model"
+	"post6.net/goled/model/poly/minipoly"
 	"post6.net/goled/model/poly/polyhedrone"
 	"time"
 )
@@ -65,6 +67,7 @@ var gamma, brightness float64
 var fps, switchTime, blendTime int
 var ledOrder led.LedOrder
 //var ambient bool
+var mini bool
 var animations = []ani.Animation(nil)
 
 func addAni(a ani.Animation) {
@@ -77,6 +80,7 @@ func init() {
 	flag.IntVar(&fps, "fps", 80, "frames per second")
 	flag.IntVar(&switchTime, "switchtime", 60, "seconds per animation")
 //	flag.BoolVar(&ambient, "ambient", false, "don't load bright animations")
+	flag.BoolVar(&mini, "mini", false, "use small polyhedron model")
 	ledOrder = led.RGB
 	flag.Var(&ledOrder, "ledorder", "led order")
 }
@@ -97,7 +101,16 @@ func main() {
 
 	flag.Parse()
 
-	ball := polyhedrone.Ledball()
+	var ball *model.Model3D
+	var inside bool
+
+	if mini {
+		ball = minipoly.Ledball()
+		inside = false
+	} else {
+		ball = polyhedrone.Ledball()
+		inside = true
+	}
 	unitBall := ball.UnitScale()
 	smooth := ball.Smooth()
 
@@ -117,13 +130,17 @@ func main() {
 	baseDir := path.Dir(os.Args[0])
 	earth, _ := os.Open(baseDir + "/earth.png")
 
-	addAni(wobble.NewWobble(smooth.Leds, wobble.Inside))
+	if inside {
+		addAni(wobble.NewWobble(smooth.Leds, wobble.Inside))
+	}
 	addAni(fire.NewFire(smooth.Leds))
 	addAni(wobble.NewWobble(unitBall.Leds, wobble.Outside))
 	addAni(snake.NewSnake(ball))
 	addAni(cache.NewCachedAni(image.NewImageAni(smooth.Leds, earth, 0, 0, 0), len(smooth.Leds), 256))
-	addAni(shadowwalk.NewShadowWalk(smooth.Leds))
-	addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 3))
+	if inside {
+		addAni(shadowwalk.NewShadowWalk(smooth.Leds))
+	}
+	addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 8))
 	addAni(topo.NewTopo(ball))
 	addAni(orbit.NewOrbitAni(unitBall.Leds))
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Hard))

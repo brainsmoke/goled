@@ -19,9 +19,9 @@ type Snake struct {
 func NewSnake(m *model.Model3D) (s *Snake) {
 
 	s = new(Snake)
-	s.phaseMax = 20
+	s.phaseMax = 6
 	s.dir = 0
-	s.snake = make([]int, 9)
+	s.snake = make([]int, 3*len(m.Leds)/100)
 	for i := range s.snake {
 		s.snake[i] = -1
 	}

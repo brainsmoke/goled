@@ -12,12 +12,14 @@ type Radar struct {
 	rot             []vector.Vector3
 	buf             [][3]byte
 	wave            []byte
+	inside          []bool
 }
 
 func NewRadar(leds []model.Led3D) *Radar {
 
 	rot := make([]vector.Vector3, len(leds))
 	buf := make([][3]byte, len(leds))
+	inside := make([]bool, len(leds))
 	wave := make([]byte, 1024)
 
 	for i, l := range leds {
@@ -27,13 +29,14 @@ func NewRadar(leds []model.Led3D) *Radar {
 			Y: cmplx.Phase(complex(v.Z, v.X)) / math.Pi / 2,
 			Z: cmplx.Phase(complex(v.X, v.Y)) / math.Pi / 2,
 		}
+		inside[i] = leds[i].Inside
 	}
 
 	for i := range wave {
 		wave[i] = byte(math.Pow((1+math.Sin(float64(i)/1024*2*math.Pi))/2, 2) * 255)
 	}
 
-	return &Radar{phaseMax: 20 * 7 * 8 * 9, phase: 0, rot: rot, buf: buf, wave: wave}
+	return &Radar{phaseMax: 20 * 7 * 8 * 9, phase: 0, rot: rot, buf: buf, wave: wave, inside: inside}
 }
 
 func (r *Radar) Next() [][3]byte {
@@ -42,7 +45,7 @@ func (r *Radar) Next() [][3]byte {
 
 	for i, rot := range r.rot {
 
-		if i%5 != 4 {
+		if !r.inside[i] {
 			r.buf[i] = [3]byte{
 				r.wave[int(1024*(rot.Z-phi*7+8))%1024],
 				r.wave[int(1024*(rot.X-phi*8+9))%1024],

@@ -15,6 +15,8 @@ const (
 	Outside
 )
 
+const zoom = 3
+
 type Fire2d struct {
 	width, height int
 	colorTab      [2048][3]byte
@@ -34,7 +36,7 @@ type Fire struct {
 	sinY            []float64
 	vmap            []int
 	phase, phaseMax int
-	whichLeds       int
+//	whichLeds       int
 }
 
 func uintMin(a, b uint) uint {
@@ -130,24 +132,34 @@ func newFire(leds []model.Led3D, whichLeds int) (a *Fire) {
 	points := make([]vector.Vector3, len(leds))
 
 	for i, led := range leds {
-		points[i] = led.Position
+		if whichLeds == All || (whichLeds == Inside) == led.Inside {
+			points[i] = led.Position
+		} else {
+			points[i] = vector.Vector3{ -9001, -9001, -9001 }
+		}
 	}
 
-	a.vmap, a.sinY = projection.Voronoi(a.fire.width, a.fire.height, points)
+	a.vmap, a.sinY = projection.Voronoi(a.fire.width*zoom, a.fire.height*zoom, points)
 
 	a.buf = make([][3]byte, len(leds))
 	a.accum = make([][3]float64, len(leds))
 	a.max = make([]float64, len(leds))
 
-	for y := 0; y < a.fire.height; y++ {
-		for x := 0; x < a.fire.width; x++ {
-			a.max[a.vmap[y*a.fire.width+x]] += a.sinY[y]
+	for y := 0; y < a.fire.height*zoom; y++ {
+		for x := 0; x < a.fire.width*zoom; x++ {
+			a.max[a.vmap[y*a.fire.width*zoom+x]] += a.sinY[y]
+		}
+	}
+
+	for i := range a.max {
+		if whichLeds != All && (whichLeds == Inside) != leds[i].Inside {
+			a.max[i] = -1
 		}
 	}
 
 	a.mix = a.fire.Next()
 	a.phase, a.phaseMax = 0, 4
-	a.whichLeds = whichLeds
+//	a.whichLeds = whichLeds
 
 	return a
 }
@@ -172,33 +184,32 @@ func (a *Fire) Next() [][3]byte {
 
 	sinY := a.sinY
 
-	i := 0
-	for y := 0; y < a.fire.height; y++ {
+	for y := 0; y < a.fire.height*zoom; y++ {
 		density := sinY[y]
-		for x := 0; x < a.fire.width; x++ {
+		for x := 0; x < a.fire.width*zoom; x++ {
 
-			led := a.vmap[i]
+			led := a.vmap[y*a.fire.width*zoom+x]
+			i := (y/zoom)*a.fire.width + x/zoom
 			a.accum[led][0] += density * float64(a.mix[i][0])
 			a.accum[led][1] += density * float64(a.mix[i][1])
 			a.accum[led][2] += density * float64(a.mix[i][2])
-			i++
 		}
 	}
 
 	for i := range a.buf {
 
-		if a.whichLeds == All || (i%5 == 4) == (a.whichLeds == Inside) {
-			if a.max[i] == 0 {
-				a.buf[i] = [3]byte{0, 0, 255}
-			} else {
-				a.buf[i][0] = clip.FloatToByte(a.accum[i][0] / a.max[i] / 8)
-				a.buf[i][1] = clip.FloatToByte(a.accum[i][1] / a.max[i] / 8)
-				a.buf[i][2] = clip.FloatToByte(a.accum[i][2] / a.max[i] / 8)
-			}
-			a.accum[i][0] = a.accum[i][0] * 7 / 8
-			a.accum[i][1] = a.accum[i][1] * 7 / 8
-			a.accum[i][2] = a.accum[i][2] * 7 / 8
+		if a.max[i] == -1 {
+			a.buf[i] = [3]byte{0, 0, 0}
+		} else if a.max[i] == 0 {
+			a.buf[i] = [3]byte{0, 0, 255}
+		} else {
+			a.buf[i][0] = clip.FloatToByte(a.accum[i][0] / a.max[i] / 8)
+			a.buf[i][1] = clip.FloatToByte(a.accum[i][1] / a.max[i] / 8)
+			a.buf[i][2] = clip.FloatToByte(a.accum[i][2] / a.max[i] / 8)
 		}
+		a.accum[i][0] = a.accum[i][0] * 7 / 8
+		a.accum[i][1] = a.accum[i][1] * 7 / 8
+		a.accum[i][2] = a.accum[i][2] * 7 / 8
 	}
 	return a.buf[:]
 }

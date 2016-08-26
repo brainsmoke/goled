@@ -30,14 +30,14 @@ var traversal = polyhedron.RemapRoute{
 	BottomRight, TopRight,
 	TopRight,
 	BottomRight, BottomRight, BottomRight, TopRight,
-	BottomRight, 
+	BottomRight,
 
 	BottomRight, TopRight,
 	BottomRight, TopRight,
 	BottomRight, TopRight,
 	TopRight,
 	BottomRight, BottomRight, BottomRight, TopRight,
-	BottomRight, 
+	BottomRight,
 }
 
 var ledPositions = []poly.FacePosition { // in mm, polygon point 0 defined as up, Center == (0, 0)

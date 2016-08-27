@@ -153,7 +153,6 @@ func main() {
 	addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 32))
 	addAni(topo.NewTopo(ball))
 	addAni(orbit.NewOrbitAni(unitBall.Leds))
-	//addAni(orbit.NewOrbitAni(smoothUnitBall.Leds))
 	addAni(gameoflife.NewGameOfLife(ball))
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Hard, gradient.Outside))
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Hard, gradient.Inside))

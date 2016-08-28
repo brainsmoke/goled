@@ -11,6 +11,19 @@ func FloatToByte(f float64) byte {
 	}
 }
 
+func FloatToUintRange(f float64, min, max uint) uint {
+
+	u := uint(f)
+
+	if u >= max {
+		return max
+	} else if u <= min {
+		return min
+	} else {
+		return u
+	}
+}
+
 func FloatBetween(f, min, max float64) float64 {
 	if f < min {
 		return min

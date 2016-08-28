@@ -1,7 +1,7 @@
 package drivers
 
 /*
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 #include <sys/ioctl.h>
 
 #include <linux/spi/spidev.h>

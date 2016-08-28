@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 	"path"
+//"fmt"
 	"post6.net/goled/ani"
 	"post6.net/goled/ani/blend"
 	"post6.net/goled/ani/cache"
@@ -77,7 +78,7 @@ func addAni(a ani.Animation) {
 }
 
 func init() {
-	flag.Float64Var(&gamma, "gamma", 2.2, "used gamma correction setting")
+	flag.Float64Var(&gamma, "gamma", 2.5, "used gamma correction setting")
 	flag.Float64Var(&brightness, "brightness", 1., "used brighness setting")
 	flag.IntVar(&fps, "fps", 80, "frames per second")
 	flag.IntVar(&switchTime, "switchtime", 60, "seconds per animation")
@@ -121,10 +122,23 @@ func main() {
 	//smoothUnitBall := ball.UnitScale().Smooth()
 	smooth := ball.Smooth()
 
-	strip := led.NewLedStrip(len(ball.Leds), ledOrder, gamma, brightness)
 
 	in := os.Stdin
-	out := drivers.LedDriver()
+	driver := drivers.GetLedDriver()
+	strip := led.NewLedStrip(len(ball.Leds), ledOrder, driver.Bpp(), driver.MaxValue(), gamma, brightness)
+	if driver.Bpp() == 16 {
+		strip.SetCutoff(0x08, 0x30)
+	}
+
+	var frameBuffer []byte
+	if p12 {
+		frameBuffer = make([]byte, 930*strip.LedSize())
+		strip.MapRange(0, 450, 0)
+		strip.MapRange(450, 450, 480*strip.LedSize())
+	} else {
+		frameBuffer = make([]byte, len(ball.Leds)*strip.LedSize())
+		strip.MapRange(0, len(ball.Leds), 0)
+	}
 
 	events := make(chan int)
 
@@ -200,7 +214,11 @@ func main() {
 				curFrame = tmpFrame
 				blendIter--
 			}
-			out.Write(strip.LoadFrame(curFrame))
+			strip.LoadFrame(curFrame, frameBuffer)
+			_, err := driver.Write(frameBuffer)
+			if err != nil {
+				panic("write error")
+			}
 
 		case <-nextAni.C:
 			last = current

@@ -36,3 +36,11 @@ func (spi *Ws2801Spi) Write(p []byte) (n int, err error) {
 func (spi *Ws2801Spi) Close() (err error) {
 	return spi.file.Close()
 }
+
+func (spi *Ws2801Spi) Bpp() int {
+	return 8
+}
+
+func (spi *Ws2801Spi) MaxValue() uint {
+	return 255
+}

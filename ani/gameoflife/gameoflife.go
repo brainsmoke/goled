@@ -18,7 +18,7 @@ type GameOfLife struct {
 func NewGameOfLife(m *model.Model3D) (g *GameOfLife) {
 
 	g = new(GameOfLife)
-	g.phaseMax = 32
+	g.phaseMax = 64
 	g.iterMax = 64
 
 	g.neighbours = m.Neighbours

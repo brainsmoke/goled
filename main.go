@@ -127,7 +127,7 @@ func main() {
 	driver := drivers.GetLedDriver()
 	strip := led.NewLedStrip(len(ball.Leds), ledOrder, driver.Bpp(), driver.MaxValue(), gamma, brightness)
 	if driver.Bpp() == 16 {
-		strip.SetCutoff(0x08, 0x30)
+		strip.SetCutoff(0x20, 0x40)
 	}
 
 	var frameBuffer []byte

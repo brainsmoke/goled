@@ -176,9 +176,7 @@ func main() {
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Striped, gradient.Inside))
 
 	addAni(gradient.NewSpiral(smooth.Leds, gradient.Hard, gradient.Outside))
-	addAni(gradient.NewSpiral(smooth.Leds, gradient.Binary, gradient.Outside))
 	addAni(gradient.NewSpiral(smooth.Leds, gradient.Smooth, gradient.Outside))
-	addAni(gradient.NewSpiral(smooth.Leds, gradient.Striped, gradient.Outside))
 	addAni(gradient.NewSpiral(smooth.Leds, gradient.Striped, gradient.Inside))
 	if p12 {
 		addAni(fifteen.NewFifteen(ball.Leds))

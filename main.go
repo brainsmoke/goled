@@ -255,6 +255,9 @@ func main() {
 						nextAni = nextTicker()
 					}
 				case quit:
+					curFrame = make([][3]byte, len(ball.Leds))
+					strip.LoadFrame(curFrame, frameBuffer)
+					driver.Write(frameBuffer)
 					os.Exit(0)
 				}
 			} else {

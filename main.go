@@ -80,7 +80,7 @@ func addAni(a ani.Animation) {
 func init() {
 	flag.Float64Var(&gamma, "gamma", 2.5, "used gamma correction setting")
 	flag.Float64Var(&brightness, "brightness", 1., "used brighness setting")
-	flag.IntVar(&fps, "fps", 80, "frames per second")
+	flag.IntVar(&fps, "fps", 100, "frames per second")
 	flag.IntVar(&switchTime, "switchtime", 60, "seconds per animation")
 //	flag.BoolVar(&ambient, "ambient", false, "don't load bright animations")
 	flag.BoolVar(&mini, "mini", false, "use small polyhedron model")

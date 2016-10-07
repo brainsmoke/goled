@@ -11,6 +11,8 @@ func NewTeensy16(filename string) (t *Teensy16, err error) {
 
 	t = new(Teensy16)
 	t.file, err = os.OpenFile(filename, os.O_RDWR, 0)
+	SetBaudrate(t.file, 12000000)
+	SetBinary(t.file)
 
 	if err != nil {
 		t.file.Close()
@@ -21,14 +23,16 @@ func NewTeensy16(filename string) (t *Teensy16, err error) {
 }
 
 func (t *Teensy16) Write(p []byte) (n int, err error) {
-	needed := (len(p)+3) &^ 1
+	needed := (len(p)+5) &^ 1
 	if len(t.buf) < needed {
 		t.buf = make([]byte, needed)
 
 	}
 	copy(t.buf, p)
+	t.buf[needed-4] = 0xff
+	t.buf[needed-3] = 0xff
 	t.buf[needed-2] = 0xff
-	t.buf[needed-1] = 0xff
+	t.buf[needed-1] = 0xf0
 	return t.file.Write(t.buf)
 }
 

@@ -127,7 +127,7 @@ func main() {
 	driver := drivers.GetLedDriver()
 	strip := led.NewLedStrip(len(ball.Leds), ledOrder, driver.Bpp(), driver.MaxValue(), gamma, brightness)
 	if driver.Bpp() == 16 {
-		strip.SetCutoff(0x20, 0x40)
+		strip.SetCutoff(0x18, 0x18)
 	}
 
 	var frameBuffer []byte
@@ -152,6 +152,7 @@ func main() {
 	earth, _ := os.Open(baseDir + "/earth.png")
 	newImg, _ := os.Open(baseDir + "/newimg.png")
 
+
 	if inside {
 		addAni(wobble.NewWobble(smooth.Leds, wobble.Inside))
 	}
@@ -175,9 +176,8 @@ func main() {
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Striped, gradient.Outside))
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Striped, gradient.Inside))
 
-	addAni(gradient.NewSpiral(smooth.Leds, gradient.Hard, gradient.Outside))
-	addAni(gradient.NewSpiral(smooth.Leds, gradient.Smooth, gradient.Outside))
-	addAni(gradient.NewSpiral(smooth.Leds, gradient.Striped, gradient.Inside))
+	addAni(gradient.NewSpiral(smooth.Leds, 1, 1, gradient.Hard, gradient.Outside))
+	addAni(gradient.NewSpiral(smooth.Leds, 1, 1, gradient.Smooth, gradient.Outside))
 	if p12 {
 		addAni(fifteen.NewFifteen(ball.Leds))
 	} else {

@@ -28,19 +28,20 @@ type Gradient struct {
 	useMap          []bool
 }
 
-func NewSpiral(leds []model.Led3D, gradientType, whichLeds int) *Gradient {
+func NewSpiral(leds []model.Led3D, nStripes, nRotations, gradientType, whichLeds int) *Gradient {
 
 	rot := make([]Vector3, len(leds))
 	buf := make([][3]byte, len(leds))
 	useMap := make([]bool, len(leds))
 	wave := make([]byte, 1024)
+	fRotations, fStripes := float64(nRotations), float64(nStripes)
 
 	for i, l := range leds {
 		v := l.Position.Normalize()
 		rot[i] = Vector3{
-			(1.-v.X/2.+cmplx.Phase(complex(v.Y, v.Z)) / math.Pi / 2),
-			(1.-v.Y/2.+cmplx.Phase(complex(v.Z, v.X)) / math.Pi / 2),
-			(1.-v.Z/2.+cmplx.Phase(complex(v.X, v.Y)) / math.Pi / 2),
+			(1.-v.X/2.*fRotations+cmplx.Phase(complex(v.Y, v.Z)) / math.Pi / 2 * fStripes),
+			(1.-v.Y/2.*fRotations+cmplx.Phase(complex(v.Z, v.X)) / math.Pi / 2 * fStripes),
+			(1.-v.Z/2.*fRotations+cmplx.Phase(complex(v.X, v.Y)) / math.Pi / 2 * fStripes),
 		}
 
 		rot[i].X -= math.Floor(rot[i].X)

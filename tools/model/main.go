@@ -5,8 +5,11 @@ import (
     "flag"
 	"os"
 	"post6.net/goled/model"
-	"post6.net/goled/model/poly/minipoly"
+//	"post6.net/goled/model/poly/minipoly"
 	"post6.net/goled/model/poly/polyhedrone"
+	"post6.net/goled/model/poly/poly12"
+//	"post6.net/goled/model/poly/icosidode"
+//	"post6.net/goled/model/poly/miniball"
     "io"
 )
 
@@ -47,9 +50,15 @@ func main() {
 
 	if modelName == "polyhedrone" {
 		m = polyhedrone.Ledball()
-	} else if modelName == "minipoly" {
+	} else if modelName == "poly12" {
+		m = poly12.Ledball()
+/*	} else if modelName == "minipoly" {
 		m = minipoly.Ledball()
-	}
+	} else if modelName == "icosidode" {
+		m = icosidode.Ledball()
+	} else if modelName == "miniball" {
+		m = miniball.Ledball()
+*/	}
 
 	writeModel(os.Stdout, m.Leds)
 }

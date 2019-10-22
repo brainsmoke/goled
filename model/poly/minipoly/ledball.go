@@ -61,11 +61,11 @@ func polyhedronePositions() [][]poly.FacePosition {
 	return facesList
 }
 
-func ledNeighbours(faces []polyhedron.Face) [][]int {
+func ledNeighbours(solid polyhedron.Solid) [][]int {
 
 	neighbourList := make([][]int, 120)
 
-	for i, f := range faces {
+	for i, f := range solid.Faces {
 
 		for j := i*5 ; j < (i+1)*5 ; j++ {
 			neighbourList[j] = make([]int, 4)
@@ -103,7 +103,7 @@ func ledNeighbours(faces []polyhedron.Face) [][]int {
 	return neighbourList
 }
 
-func ledGroups(leds []model.Led3D, faces []polyhedron.Face) map[string][]int {
+func ledGroups(leds []model.Led3D, solid polyhedron.Solid) map[string][]int {
 
 	groups := make(map[string][]int)
 
@@ -129,9 +129,9 @@ func ledGroups(leds []model.Led3D, faces []polyhedron.Face) map[string][]int {
 			groups["rhomb"][i] = 8 + octahedron[f]
 		} else if i%5 == LedRight && groups["rhomb"][i] == 0 {
 
-			topRight := faces[f].Neighbours[TopRight]
-			bottomRight := faces[f].Neighbours[BottomRight]
-			opposite := faces[topRight].Neighbours[BottomLeft]
+			topRight := solid.Faces[f].Neighbours[TopRight]
+			bottomRight := solid.Faces[f].Neighbours[BottomRight]
+			opposite := solid.Faces[topRight].Neighbours[BottomLeft]
 
 			groups["rhomb"][i] = rhombCount
 			groups["rhomb"][5*topRight+LedLeft] = rhombCount
@@ -150,14 +150,13 @@ var ledball *model.Model3D
 
 func cacheLedball() {
 
-	faces := polyhedron.RemapFaces(polyhedron.DeltoidalIcositetrahedronFaces(), 0, traversal)
-	factor := innerRadius / faces[0].Center.Magnitude()
-	faces = polyhedron.Scale(faces, factor)
+	solid := polyhedron.RemapSolid(polyhedron.DeltoidalIcositetrahedron(), 0, traversal)
+	solid.Scale( innerRadius / solid.Faces[0].Center.Magnitude() )
 
 	ledball = new(model.Model3D)
-	ledball.Leds = poly.PopulateLeds(faces, polyhedronePositions())
-	ledball.Neighbours = ledNeighbours(faces)
-	ledball.Groups = ledGroups(ledball.Leds, faces)
+	ledball.Leds = poly.PopulateLeds(solid, polyhedronePositions())
+	ledball.Neighbours = ledNeighbours(solid)
+	ledball.Groups = ledGroups(ledball.Leds, solid)
 }
 
 func Ledball() *model.Model3D {

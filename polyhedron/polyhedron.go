@@ -9,9 +9,14 @@ import (
 
 type Face struct {
 	Normal, Center vector.Vector3
-	Polygon        []vector.Vector3
+	Polygon        []int
 	Neighbours     []int
 	Angles         []float64
+}
+
+type Solid struct {
+	Points []vector.Vector3
+	Faces []Face
 }
 
 func neighbourDistance(points []vector.Vector3, index int) float64 {
@@ -88,7 +93,7 @@ func findNextPoint(points []vector.Vector3, p0, p1, p2 int) int {
 		}
 	}
 
-	panic("meh, not a valid polyhedron")
+	panic("meh, not a valid platonic/archimedean")
 }
 
 func findRegularPolygon(points []vector.Vector3, last, first, second int) []int {
@@ -122,6 +127,7 @@ func vertexInfo(points []vector.Vector3, index int) (neighbours []int, faces [][
 
 	first := 0
 
+	/* sort list of polygons based on vertex figure notation (smallest first) */
 	for rot := range polygons {
 		for i := range polygons {
 			if len(polygons[(i+rot)%size]) < len(polygons[(i+first)%size]) {
@@ -138,7 +144,51 @@ func vertexInfo(points []vector.Vector3, index int) (neighbours []int, faces [][
 	       append(polygons[first:], polygons[:first]...)
 }
 
-func CatalanDualFace(points []vector.Vector3, index int) Face {
+
+func faceList(points []vector.Vector3) [][]int {
+
+	face_list := [][]int{}
+
+	for i := range points {
+		_, polygons := vertexInfo(points, i)
+		for _, p := range polygons {
+			if smallestElementIndex(p) == 0 {
+				face_list = append(face_list, p)
+			}
+		}
+	}
+	return face_list
+}
+
+func intArrayEquals(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i,v := range(a) {
+		if b[i] != v {
+			return false
+		}
+	}
+
+	return true
+}
+
+
+func findFaceIndex(face_list [][]int, face[]int) int {
+	e0 := smallestElementIndex(face)
+	normalized_face := append(face[e0:], face[:e0]...)
+	for i := range(face_list) {
+		if intArrayEquals(face_list[i], normalized_face) {
+			return i
+		}
+	}
+
+	panic("face not found")
+	//return -1
+}
+
+func CatalanDualFace(points []vector.Vector3, face_list [][]int, index int) Face {
 
 	neighbours, polygons := vertexInfo(points, index)
 
@@ -154,36 +204,48 @@ func CatalanDualFace(points []vector.Vector3, index int) Face {
 		f.Angles[i] = math.Acos(1-d*d)
 	}
 
-	f.Polygon = make([]vector.Vector3, len(polygons))
+	f.Polygon = make([]int, len(polygons))
+
 	for i, poly := range polygons {
-		x, y, z := 0., 0., 0.
-		for _, j := range poly {
-			x, y, z = x+points[j].X, y+points[j].Y, z+points[j].Z
-		}
-		f.Polygon[i] = ScaleToPlaneOnNormal(vector.Vector3{x, y, z}, f.Center)
+		f.Polygon[i] = findFaceIndex(face_list, poly)
 	}
 
 	return f
 }
 
-func CatalanDualFaces(points []vector.Vector3) []Face {
+func CatalanDual(points []vector.Vector3) Solid {
+	/* in: vertices of an archimedean solid , out: its catalan dual */
 
-	f := make([]Face, len(points))
+	var solid Solid
+
+	face_list := faceList(points)
+	solid.Points = make([]vector.Vector3, len(face_list)) /* points become faces, faces become points */
+
+	for i := range(face_list) {
+		v := vector.Vector3{0,0,0}
+		for _, ix := range face_list[i] {
+			v = v.Add(points[ix])
+		}
+		plane_normal := points[face_list[i][0]].Normalize()
+		solid.Points[i] = ScaleToPlaneOnNormal(v, plane_normal) /* scale to inscribed sphere */
+	}
+
+	solid.Faces = make([]Face, len(points))
 
 	for i := range points {
 
-		f[i] = CatalanDualFace(points, i)
+		solid.Faces[i] = CatalanDualFace(points, face_list, i)
 	}
 
-	return f
+	return solid
 }
 
-func smallestElement(list []int) int {
+func smallestElementIndex(list []int) int {
 
-	res := list[0]
+	res := 0
 	for i := range list {
-		if res > list[i] {
-			res = list[i]
+		if list[res] > list[i] {
+			res = i
 		}
 	}
 	return res
@@ -203,14 +265,22 @@ func findPolygonWithEdge(pList [][]int, a, b int) int {
 	panic("meh, not a valid polyhedron")
 }
 
-func ArchimedeanFaces(points []vector.Vector3) []Face {
+
+func Archimedean(points []vector.Vector3) Solid {
+
+	var solid Solid
+	solid.Points = make([]vector.Vector3, len(points))
+
+	for i := range points {
+		solid.Points[i] = points[i].Normalize()
+	}
 
 	face_list := [][]int{}
 
 	for i := range points {
 		_, polygons := vertexInfo(points, i)
 		for _, p := range polygons {
-			if p[0] == smallestElement(p) {
+			if smallestElementIndex(p) == 0 {
 				face_list = append(face_list, p)
 			}
 		}
@@ -220,15 +290,17 @@ func ArchimedeanFaces(points []vector.Vector3) []Face {
 
 	for i := range face_list {
 
-		f[i].Polygon = make([]vector.Vector3, len(face_list[i]))
+		f[i].Polygon = append([]int{}, face_list[i]...)
 		f[i].Neighbours = make([]int, len(face_list[i]))
 
-		for j := range face_list[i] {
-			f[i].Polygon[j] = points[face_list[i][j]].Normalize()
+		v := vector.Vector3{0,0,0}
+
+		for _, ix := range f[i].Polygon {
+			v = v.Add(solid.Points[ix])
 		}
 
-		f[i].Center = vector.Average(f[i].Polygon)
-		f[i].Normal = f[i].Center.Normalize()
+		f[i].Center = v.Mul(1/float64(len(f[i].Polygon)))
+		f[i].Normal = v.Normalize()
 
 		for j := range face_list[i] {
 
@@ -246,7 +318,9 @@ func ArchimedeanFaces(points []vector.Vector3) []Face {
 		}
 	}
 
-	return f
+	solid.Faces = f
+
+	return solid
 }
 
 

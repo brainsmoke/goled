@@ -260,131 +260,131 @@ func SnubDodecahedronPoints() []vector.Vector3 {
 
 /* Platonic solids */
 
-func TetrahedronFaces() []Face { /* T */
-    return CatalanDualFaces(TetrahedronPoints())
+func Tetrahedron() Solid { /* T */
+    return CatalanDual(TetrahedronPoints())
 }
 
-func OctahedronFaces() []Face { /* O */
-    return CatalanDualFaces(CubePoints())
+func Octahedron() Solid { /* O */
+    return CatalanDual(CubePoints())
 }
 
-func CubeFaces() []Face { /* C */
-    return ArchimedeanFaces(CubePoints())
+func Cube() Solid { /* C */
+    return Archimedean(CubePoints())
 }
 
-func DodecahedronFaces() []Face { /* D */
-    return CatalanDualFaces(IcosahedronPoints())
+func Dodecahedron() Solid { /* D */
+    return CatalanDual(IcosahedronPoints())
 }
 
-func IcosahedronFaces() []Face { /* I */
-    return ArchimedeanFaces(IcosahedronPoints())
+func Icosahedron() Solid { /* I */
+    return Archimedean(IcosahedronPoints())
 }
 
 /* Archimedean solids */
 
-func TruncatedTetrahedronFaces() []Face { /* tT */
-    return ArchimedeanFaces(TruncatedTetrahedronPoints())
+func TruncatedTetrahedron() Solid { /* tT */
+    return Archimedean(TruncatedTetrahedronPoints())
 }
 
-func TruncatedCubeFaces() []Face { /* tC */
-    return ArchimedeanFaces(TruncatedCubePoints())
+func TruncatedCube() Solid { /* tC */
+    return Archimedean(TruncatedCubePoints())
 }
 
-func TruncatedCuboctahedronFaces() []Face { /* bC */
-    return ArchimedeanFaces(TruncatedCuboctahedronPoints())
+func TruncatedCuboctahedron() Solid { /* bC */
+    return Archimedean(TruncatedCuboctahedronPoints())
 }
 
-func TruncatedOctahedronFaces() []Face { /* tO */
-    return ArchimedeanFaces(TruncatedOctahedronPoints())
+func TruncatedOctahedron() Solid { /* tO */
+    return Archimedean(TruncatedOctahedronPoints())
 }
 
-func TruncatedDodecahedronFaces() []Face { /* tD */
-    return ArchimedeanFaces(TruncatedDodecahedronPoints())
+func TruncatedDodecahedron() Solid { /* tD */
+    return Archimedean(TruncatedDodecahedronPoints())
 }
 
-func TruncatedIcosidodecahedronFaces() []Face { /* bD */
-    return ArchimedeanFaces(TruncatedIcosidodecahedronPoints())
+func TruncatedIcosidodecahedron() Solid { /* bD */
+    return Archimedean(TruncatedIcosidodecahedronPoints())
 }
 
-func TruncatedIcosahedronFaces() []Face { /* tI */
-    return ArchimedeanFaces(TruncatedIcosahedronPoints())
+func TruncatedIcosahedron() Solid { /* tI */
+    return Archimedean(TruncatedIcosahedronPoints())
 }
 
-func CuboctahedronFaces() []Face { /* aC */
-    return ArchimedeanFaces(CuboctahedronPoints())
+func Cuboctahedron() Solid { /* aC */
+    return Archimedean(CuboctahedronPoints())
 }
 
-func IcosidodecahedronFaces() []Face { /* aD */
-    return ArchimedeanFaces(IcosidodecahedronPoints())
+func Icosidodecahedron() Solid { /* aD */
+    return Archimedean(IcosidodecahedronPoints())
 }
 
-func RhombicuboctahedronFaces() []Face { /* eC */
-    return ArchimedeanFaces(RhombicuboctahedronPoints())
+func Rhombicuboctahedron() Solid { /* eC */
+    return Archimedean(RhombicuboctahedronPoints())
 }
 
-func RhombicosidodecahedronFaces() []Face { /* eD */
-    return ArchimedeanFaces(RhombicosidodecahedronPoints())
+func Rhombicosidodecahedron() Solid { /* eD */
+    return Archimedean(RhombicosidodecahedronPoints())
 }
 
-func SnubCubeFaces() []Face { /* sC */
-    return ArchimedeanFaces(SnubCubePoints())
+func SnubCube() Solid { /* sC */
+    return Archimedean(SnubCubePoints())
 }
 
-func SnubDodecahedronFaces() []Face { /* sD */
-    return ArchimedeanFaces(SnubDodecahedronPoints())
+func SnubDodecahedron() Solid { /* sD */
+    return Archimedean(SnubDodecahedronPoints())
 }
 
 /* Catalan solids */
 
-func TriakisTetrahedronFaces() []Face { /* kT */
-    return CatalanDualFaces(TruncatedTetrahedronPoints())
+func TriakisTetrahedron() Solid { /* kT */
+    return CatalanDual(TruncatedTetrahedronPoints())
 }
 
-func TriakisOctahedronFaces() []Face { /* kO */
-    return CatalanDualFaces(TruncatedCubePoints())
+func TriakisOctahedron() Solid { /* kO */
+    return CatalanDual(TruncatedCubePoints())
 }
 
-func DisdyakisDodecahedronFaces() []Face { /* mC */
-    return CatalanDualFaces(TruncatedCuboctahedronPoints())
+func DisdyakisDodecahedron() Solid { /* mC */
+    return CatalanDual(TruncatedCuboctahedronPoints())
 }
 
-func TetrakisHexahedronFaces() []Face { /* kC */
-    return CatalanDualFaces(TruncatedOctahedronPoints())
+func TetrakisHexahedron() Solid { /* kC */
+    return CatalanDual(TruncatedOctahedronPoints())
 }
 
-func TriakisIcosahedronFaces() []Face { /* kI */
-    return CatalanDualFaces(TruncatedDodecahedronPoints())
+func TriakisIcosahedron() Solid { /* kI */
+    return CatalanDual(TruncatedDodecahedronPoints())
 }
 
-func DisdyakisTriacontahedronFaces() []Face { /* mD */
-    return CatalanDualFaces(TruncatedIcosidodecahedronPoints())
+func DisdyakisTriacontahedron() Solid { /* mD */
+    return CatalanDual(TruncatedIcosidodecahedronPoints())
 }
 
-func PentakisDodecahedronFaces() []Face { /* kD */
-    return CatalanDualFaces(TruncatedIcosahedronPoints())
+func PentakisDodecahedron() Solid { /* kD */
+    return CatalanDual(TruncatedIcosahedronPoints())
 }
 
-func RhombicDodecahedronFaces() []Face { /* jC */
-    return CatalanDualFaces(CuboctahedronPoints())
+func RhombicDodecahedron() Solid { /* jC */
+    return CatalanDual(CuboctahedronPoints())
 }
 
-func RhombicTriacontahedronFaces() []Face { /* jD */
-    return CatalanDualFaces(IcosidodecahedronPoints())
+func RhombicTriacontahedron() Solid { /* jD */
+    return CatalanDual(IcosidodecahedronPoints())
 }
 
-func DeltoidalIcositetrahedronFaces() []Face { /* oC */
-    return CatalanDualFaces(RhombicuboctahedronPoints())
+func DeltoidalIcositetrahedron() Solid { /* oC */
+    return CatalanDual(RhombicuboctahedronPoints())
 }
 
-func DeltoidalHexecontahedronFaces() []Face { /* oD */
-    return CatalanDualFaces(RhombicosidodecahedronPoints())
+func DeltoidalHexecontahedron() Solid { /* oD */
+    return CatalanDual(RhombicosidodecahedronPoints())
 }
 
-func PentagonalIcositetrahedronFaces() []Face { /* gC */
-    return CatalanDualFaces(SnubCubePoints())
+func PentagonalIcositetrahedron() Solid { /* gC */
+    return CatalanDual(SnubCubePoints())
 }
 
-func PentagonalHexecontahedronFaces() []Face { /* gD */
-    return CatalanDualFaces(SnubDodecahedronPoints())
+func PentagonalHexecontahedron() Solid { /* gD */
+    return CatalanDual(SnubDodecahedronPoints())
 }
 

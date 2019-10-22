@@ -11,9 +11,10 @@ type FacePosition struct {
 	Inside bool
 }
 
-func populateFaceLeds(f polyhedron.Face, index int, ledPositions []FacePosition) []model.Led3D {
+func populateFaceLeds(s polyhedron.Solid, index int, ledPositions []FacePosition) []model.Led3D {
 
-	top, center, normal := f.Polygon[0], f.Center, f.Normal
+	f := s.Faces[index]
+	top, center, normal := s.Points[f.Polygon[0]], f.Center, f.Normal
 	leds := make([]model.Led3D, len(ledPositions))
 
 	for i, p := range ledPositions {
@@ -35,12 +36,12 @@ func populateFaceLeds(f polyhedron.Face, index int, ledPositions []FacePosition)
 }
 
 
-func PopulateLeds(faces []polyhedron.Face, ledPositions [][]FacePosition) []model.Led3D {
+func PopulateLeds(s polyhedron.Solid, ledPositions [][]FacePosition) []model.Led3D {
 
 	leds := []model.Led3D(nil)
 
-	for i := range faces {
-		leds = append(leds, populateFaceLeds(faces[i], i, ledPositions[i])...)
+	for i := range s.Faces {
+		leds = append(leds, populateFaceLeds(s, i, ledPositions[i])...)
 	}
 
 	return leds

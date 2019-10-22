@@ -60,9 +60,9 @@ func main() {
 		}
 	}
 
-	strip := led.NewLedStrip(len(ball.Leds), ledOrder, gamma, brightness)
+	out := drivers.GetLedDriver()
+	strip := led.NewLedStrip(len(ball.Leds), ledOrder, out.Bpp(), out.MaxValue(), gamma, brightness)
 
-	out := drivers.LedDriver()
 
 	frame := make( [][3]byte, len(ball.Leds) )
 
@@ -73,5 +73,7 @@ func main() {
 		}
 	}
 
-	out.Write(strip.LoadFrame(frame[:]))
+	var frameBuffer = make([]byte, len(ball.Leds)*strip.LedSize())
+	strip.LoadFrame(frame[:], frameBuffer)
+	out.Write(frameBuffer)
 }

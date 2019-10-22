@@ -7,31 +7,65 @@ import (
 type RemapRoute []int
 type RemapReorientRoute [][2]int
 
-func RemapFaces(faces []Face, first int, route RemapRoute) []Face {
+func min(a, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
 
-	newFaces := make([]Face, len(faces))
-	mapping := make([]int, len(faces))
+func RemapSolid(solid Solid, first int, route RemapRoute) Solid {
+
+	faces := make([]Face, min(len(solid.Faces), len(route)+1))
+	points := []vector.Vector3{}
+
+	face_mapping := make([]int, len(solid.Faces))
+	point_mapping := make([]int, len(solid.Points))
+
+	for i := range face_mapping {
+		face_mapping[i] = -1
+	}
+
+	for i := range point_mapping {
+		point_mapping[i] = -1
+	}
 
 	current := first
 
-	for i := range newFaces {
+	for i := range faces {
 
-		newFaces[i] = faces[current]
-		mapping[current] = i
-		current = faces[current].Neighbours[route[i]]
-	}
+		faces[i] = solid.Faces[current]
+		if face_mapping[current] != -1 {
+			panic("overlap in remapping");
+		}
+		face_mapping[current] = i
 
-	for i := range newFaces {
-		newFaces[i].Polygon = append([]vector.Vector3(nil), newFaces[i].Polygon...)
-		newFaces[i].Angles = append([]float64(nil), newFaces[i].Angles...)
-
-		newFaces[i].Neighbours = append([]int(nil), newFaces[i].Neighbours...)
-		for j, k := range newFaces[i].Neighbours {
-
-			newFaces[i].Neighbours[j] = mapping[k]
+		if i < len(route) {
+			current = solid.Faces[current].Neighbours[route[i]]
 		}
 	}
 
-	return newFaces
+	for i := range faces {
+		faces[i].Polygon = append([]int{}, faces[i].Polygon...)
+		faces[i].Angles = append([]float64{}, faces[i].Angles...)
+
+		faces[i].Neighbours = append([]int{}, faces[i].Neighbours...)
+		for j, k := range faces[i].Neighbours {
+
+			faces[i].Neighbours[j] = face_mapping[k]
+		}
+		for j, k := range faces[i].Polygon {
+
+			if point_mapping[k] == -1 {
+				point_mapping[k] = len(points)
+				points = append(points, solid.Points[k])
+			}
+
+			faces[i].Polygon[j] = point_mapping[k]
+		}
+	}
+
+	return Solid{ Points: points, Faces: faces }
 }
 

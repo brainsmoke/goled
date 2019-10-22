@@ -20,14 +20,14 @@ func writeFacet(out io.Writer, normal, a, b, c vector.Vector3) {
 
 }
 
-func WriteStl(out io.Writer, name string, faces []polyhedron.Face) {
+func WriteStl(out io.Writer, name string, solid polyhedron.Solid) {
 
 	fmt.Fprintf(out, "solid %s\n", name)
 
-	for _, f := range faces {
-		a := f.Polygon[0]
+	for _, f := range solid.Faces {
+		a := solid.Points[f.Polygon[0]]
 		for i := 1; i<len(f.Polygon)-1; i++ {
-			b, c := f.Polygon[i], f.Polygon[i+1]
+			b, c := solid.Points[f.Polygon[i]], solid.Points[f.Polygon[i+1]]
 			writeFacet(out, f.Normal, a, b, c)
 		}
 	}

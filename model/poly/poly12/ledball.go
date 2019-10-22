@@ -74,14 +74,14 @@ func polyhedronePositions() [][]poly.FacePosition {
 	return facesList
 }
 
-func ledNeighbours(faces []polyhedron.Face) [][]int {
+func ledNeighbours(solid polyhedron.Solid) [][]int {
 
 	neighbourList := make([][]int, 900)
 	for i := range neighbourList {
 		neighbourList[i] = make([]int, 4)
 	}
 
-	for i, f := range faces {
+	for i, f := range solid.Faces {
 
 		tl, tr := f.Neighbours[TopLeft], f.Neighbours[TopRight]
 		bl, br := f.Neighbours[BottomLeft], f.Neighbours[BottomRight]
@@ -165,7 +165,7 @@ func ledNeighbours(faces []polyhedron.Face) [][]int {
 	return neighbourList
 }
 
-func ledGroups(leds []model.Led3D, faces []polyhedron.Face) map[string][]int {
+func ledGroups(leds []model.Led3D, solid polyhedron.Solid) map[string][]int {
 
 	groups := make(map[string][]int)
 
@@ -188,14 +188,14 @@ func ledGroups(leds []model.Led3D, faces []polyhedron.Face) map[string][]int {
 	for i := 0; i < 60; i++ {
 		if icosaedron[i] == -1 {
 
-			for j := i; icosaedron[j] == -1; j = faces[j].Neighbours[TopLeft] {
+			for j := i; icosaedron[j] == -1; j = solid.Faces[j].Neighbours[TopLeft] {
 				icosaedron[j] = icoCount
 			}
 			icoCount++
 		}
 		if dodecahedron[i] == -1 {
 
-			for j := i; dodecahedron[j] == -1; j = faces[j].Neighbours[BottomLeft] {
+			for j := i; dodecahedron[j] == -1; j = solid.Faces[j].Neighbours[BottomLeft] {
 				dodecahedron[j] = dodeCount
 			}
 			dodeCount++
@@ -236,9 +236,9 @@ func ledGroups(leds []model.Led3D, faces []polyhedron.Face) map[string][]int {
 			case 0:
 				if groups["rhomb"][i] == 0 {
 
-					topRight := faces[f].Neighbours[TopRight]
-					bottomRight := faces[f].Neighbours[BottomRight]
-					opposite := faces[topRight].Neighbours[BottomLeft]
+					topRight := solid.Faces[f].Neighbours[TopRight]
+					bottomRight := solid.Faces[f].Neighbours[BottomRight]
+					opposite := solid.Faces[topRight].Neighbours[BottomLeft]
 
 					groups["rhomb"][i + 0] = rhombCount
 					groups["rhomb"][i + 6] = rhombCount
@@ -266,20 +266,19 @@ var ledball *model.Model3D
 
 func cacheLedball() {
 
-	faces := polyhedron.RemapFaces(polyhedron.DeltoidalHexecontahedronFaces(), 0, traversal)
-	factor := innerRadius / faces[0].Center.Magnitude()
-	faces = polyhedron.Scale(faces, factor)
+	solid := polyhedron.RemapSolid(polyhedron.DeltoidalHexecontahedron(), 0, traversal)
+	solid.Scale( innerRadius / solid.Faces[0].Center.Magnitude() )
 
-	north := faces[32].Polygon[2].Normalize()
+	north := solid.Points[solid.Faces[32].Polygon[2]].Normalize()
 	center := vector.Vector3{ 0, 0, 0 }
-	eye := north.CrossProduct(faces[32].Polygon[0]).Normalize()
+	eye := north.CrossProduct(solid.Points[solid.Faces[32].Polygon[0]]).Normalize()
 
-	faces = polyhedron.Rotate(faces, eye, center, north)
+	solid.Rotate(eye, center, north)
 
 	ledball = new(model.Model3D)
-	ledball.Leds = poly.PopulateLeds(faces, polyhedronePositions())
-	ledball.Neighbours = ledNeighbours(faces)
-	ledball.Groups = ledGroups(ledball.Leds, faces)
+	ledball.Leds = poly.PopulateLeds(solid, polyhedronePositions())
+	ledball.Neighbours = ledNeighbours(solid)
+	ledball.Groups = ledGroups(ledball.Leds, solid)
 }
 
 func Ledball() *model.Model3D {

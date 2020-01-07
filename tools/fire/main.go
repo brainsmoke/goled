@@ -25,15 +25,20 @@ func main() {
 
 	flag.Parse()
 
-	strip := led.NewLedStrip(300, ledOrder, gamma, brightness)
-	out := drivers.LedDriver()
+	ball := polyhedrone.Ledball().Smooth()
 
-	animation := fire.NewFire(polyhedrone.Ledball().Smooth().Leds)
+	out := drivers.GetLedDriver()
+	strip := led.NewLedStrip(len(ball.Leds), ledOrder, out.Bpp(), out.MaxValue(), gamma, brightness)
+	strip.MapRange(0, len(ball.Leds), 0)
+	frameBuffer := make([]byte, len(ball.Leds)*strip.LedSize())
+
+	animation := fire.NewFire(ball.Leds)
 
 	t := time.Tick(time.Second / time.Duration(fps))
 
 	for {
 		<-t
-		out.Write(strip.LoadFrame(animation.Next()))
+		strip.LoadFrame(animation.Next(), frameBuffer)
+		out.Write(frameBuffer)
 	}
 }

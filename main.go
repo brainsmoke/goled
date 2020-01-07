@@ -17,6 +17,7 @@ import (
 	"post6.net/goled/ani/image"
 	//"post6.net/goled/ani/onion"
 	"post6.net/goled/ani/orbit"
+	"post6.net/goled/ani/lorenz"
 	"post6.net/goled/ani/radar"
 	"post6.net/goled/ani/shadowplay"
 	"post6.net/goled/ani/shadowwalk"
@@ -24,12 +25,14 @@ import (
 	"post6.net/goled/ani/topo"
 //	"post6.net/goled/ani/uniform"
 	"post6.net/goled/ani/wobble"
+	"post6.net/goled/ani/ring"
 	"post6.net/goled/drivers"
 	"post6.net/goled/led"
 	"post6.net/goled/model"
 	"post6.net/goled/model/poly/minipoly"
 	"post6.net/goled/model/poly/polyhedrone"
 	"post6.net/goled/model/poly/poly12"
+	"post6.net/goled/model/poly/greatcircles"
 	"time"
 )
 
@@ -70,7 +73,7 @@ var gamma, brightness float64
 var fps, switchTime, blendTime int
 var ledOrder led.LedOrder
 //var ambient bool
-var mini, p12 bool
+var mini, p12, gc bool
 var animations = []ani.Animation(nil)
 
 func addAni(a ani.Animation) {
@@ -85,6 +88,7 @@ func init() {
 //	flag.BoolVar(&ambient, "ambient", false, "don't load bright animations")
 	flag.BoolVar(&mini, "mini", false, "use small polyhedron model")
 	flag.BoolVar(&p12, "poly12", false, "use new polyhedron model")
+	flag.BoolVar(&gc, "greatcircles", false, "use new polyhedron model")
 	ledOrder = led.RGB
 	flag.Var(&ledOrder, "ledorder", "led order")
 }
@@ -106,17 +110,24 @@ func main() {
 	flag.Parse()
 
 	var ball *model.Model3D
-	var inside bool
+	var inside, neighbours bool
 
 	if p12 {
 		ball = poly12.Ledball()
 		inside = true
+		neighbours = true
 	} else if mini {
 		ball = minipoly.Ledball()
 		inside = false
+		neighbours = true
+	} else if gc {
+		ball = greatcircles.Ledball()
+		inside = false
+		neighbours = false
 	} else {
 		ball = polyhedrone.Ledball()
 		inside = true
+		neighbours = true
 	}
 	unitBall := ball.UnitScale()
 	//smoothUnitBall := ball.UnitScale().Smooth()
@@ -158,25 +169,44 @@ func main() {
 	}
 	addAni(fire.NewFire(smooth.Leds))
 	addAni(wobble.NewWobble(unitBall.Leds, wobble.Outside))
-	addAni(snake.NewSnake(ball))
-	addAni(cache.NewCachedAni(image.NewImageAni(smooth.Leds, earth, 0, 0, 0), len(smooth.Leds), 256))
-	addAni(cache.NewCachedAni(image.NewImageAni(smooth.Leds, newImg, 0, 0, 0), len(smooth.Leds), 256))
+	if neighbours {
+		addAni(snake.NewSnake(ball))
+	}
+	if !gc {
+		addAni(cache.NewCachedAni(image.NewImageAni(smooth.Leds, earth, 0, 0, 0), len(smooth.Leds), 256))
+		addAni(cache.NewCachedAni(image.NewImageAni(smooth.Leds, newImg, 0, 0, 0), len(smooth.Leds), 256))
+	}
 	if inside {
 		addAni(shadowwalk.NewShadowWalk(smooth.Leds))
+		addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 8))
+		addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 32))
 	}
-	addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 8))
-	addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 32))
 	addAni(topo.NewTopo(ball))
-	addAni(orbit.NewOrbitAni(unitBall.Leds))
-	addAni(gameoflife.NewGameOfLife(ball))
+	addAni(orbit.NewOrbitAni(unitBall.Copy().Leds))
+	if neighbours {
+		addAni(gameoflife.NewGameOfLife(ball))
+	}
+	if !gc {
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Hard, gradient.Outside))
-	addAni(gradient.NewGradient(smooth.Leds, gradient.Hard, gradient.Inside))
+	}
+	if inside {
+		addAni(gradient.NewGradient(smooth.Leds, gradient.Hard, gradient.Inside))
+	}
+	if !gc {
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Binary, gradient.Outside))
+	}
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Smooth, gradient.Outside))
+	if !gc {
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Striped, gradient.Outside))
-	addAni(gradient.NewGradient(smooth.Leds, gradient.Striped, gradient.Inside))
+	}
+	if inside {
+		addAni(gradient.NewGradient(smooth.Leds, gradient.Striped, gradient.Inside))
+	}
 
+	addAni(lorenz.NewLorenzAni(unitBall.Leds))
+	if !gc {
 	addAni(gradient.NewSpiral(smooth.Leds, 1, 1, gradient.Hard, gradient.Outside))
+	}
 	addAni(gradient.NewSpiral(smooth.Leds, 1, 1, gradient.Smooth, gradient.Outside))
 	if p12 {
 		addAni(fifteen.NewFifteen(ball.Leds))
@@ -186,6 +216,8 @@ func main() {
 	addAni(radar.NewRadar(smooth.Leds))
 	if p12 {
 		addAni(fifteen.NewFifteenWave(smooth.Leds))
+	} else if gc {
+		addAni(ring.NewRingWave(ball))
 	} else {
 		addAni(five.NewFiveWave(smooth.Leds))
 	}

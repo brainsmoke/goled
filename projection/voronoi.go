@@ -8,8 +8,8 @@ import (
 
 func Voronoi(width, height int, points []vector.Vector3) ([]int, []float64) {
 
-	sinY := util.TrigTable(height, 0, math.Pi, math.Sin)
-	cosY := util.TrigTable(height, 0, math.Pi, math.Cos)
+	sinY := util.TrigTable(height, math.Pi*.5/float64(height), math.Pi*(float64(height)+.5)/float64(height), math.Sin)
+	cosY := util.TrigTable(height, math.Pi*.5/float64(height), math.Pi*(float64(height)+.5)/float64(height), math.Cos)
 	sinX := util.TrigTable(width, 0, 2*math.Pi, math.Sin)
 	cosX := util.TrigTable(width, 0, 2*math.Pi, math.Cos)
 

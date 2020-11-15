@@ -4,7 +4,6 @@ import (
 	"post6.net/goled/model"
 	"post6.net/goled/util/clip"
 	"post6.net/goled/vector"
-//"fmt"
 )
 
 type LorenzAni struct {

@@ -10,6 +10,7 @@ import (
 	"post6.net/goled/ani/blend"
 	"post6.net/goled/ani/cache"
 	"post6.net/goled/ani/fire"
+	"post6.net/goled/ani/fire2"
 	"post6.net/goled/ani/five"
 	"post6.net/goled/ani/fifteen"
 	"post6.net/goled/ani/gameoflife"
@@ -33,6 +34,7 @@ import (
 	"post6.net/goled/model/poly/polyhedrone"
 	"post6.net/goled/model/poly/poly12"
 	"post6.net/goled/model/poly/greatcircles"
+	"post6.net/goled/model/poly/greatcircles2"
 	"time"
 )
 
@@ -73,7 +75,7 @@ var gamma, brightness float64
 var fps, switchTime, blendTime int
 var ledOrder led.LedOrder
 //var ambient bool
-var mini, p12, gc bool
+var mini, p12, gc, gc2 bool
 var animations = []ani.Animation(nil)
 
 func addAni(a ani.Animation) {
@@ -88,7 +90,8 @@ func init() {
 //	flag.BoolVar(&ambient, "ambient", false, "don't load bright animations")
 	flag.BoolVar(&mini, "mini", false, "use small polyhedron model")
 	flag.BoolVar(&p12, "poly12", false, "use new polyhedron model")
-	flag.BoolVar(&gc, "greatcircles", false, "use new polyhedron model")
+	flag.BoolVar(&gc, "greatcircles0", false, "use old greatcircles model")
+	flag.BoolVar(&gc2, "greatcircles", false, "use new greatcircles model")
 	ledOrder = led.RGB
 	flag.Var(&ledOrder, "ledorder", "led order")
 }
@@ -120,6 +123,10 @@ func main() {
 		ball = minipoly.Ledball()
 		inside = false
 		neighbours = true
+	} else if gc2 {
+		ball = greatcircles2.Ledball()
+		inside = false
+		neighbours = false
 	} else if gc {
 		ball = greatcircles.Ledball()
 		inside = false
@@ -168,14 +175,15 @@ func main() {
 		addAni(wobble.NewWobble(smooth.Leds, wobble.Inside))
 	}
 	addAni(fire.NewFire(smooth.Leds))
+	addAni(fire2.NewFire(smooth.Leds))
 	addAni(wobble.NewWobble(unitBall.Leds, wobble.Outside))
 	if neighbours {
 		addAni(snake.NewSnake(ball))
 	}
-	if !gc {
+//	if !(gc || gc2) {
 		addAni(cache.NewCachedAni(image.NewImageAni(smooth.Leds, earth, 0, 0, 0), len(smooth.Leds), 256))
 		addAni(cache.NewCachedAni(image.NewImageAni(smooth.Leds, newImg, 0, 0, 0), len(smooth.Leds), 256))
-	}
+//	}
 	if inside {
 		addAni(shadowwalk.NewShadowWalk(smooth.Leds))
 		addAni(shadowplay.NewShadowPlay(ball.Leds, 512, 8))
@@ -186,17 +194,17 @@ func main() {
 	if neighbours {
 		addAni(gameoflife.NewGameOfLife(ball))
 	}
-	if !gc {
+	if !(gc || gc2) {
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Hard, gradient.Outside))
 	}
 	if inside {
 		addAni(gradient.NewGradient(smooth.Leds, gradient.Hard, gradient.Inside))
 	}
-	if !gc {
+	if !(gc || gc2) {
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Binary, gradient.Outside))
 	}
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Smooth, gradient.Outside))
-	if !gc {
+	if !(gc || gc2) {
 	addAni(gradient.NewGradient(smooth.Leds, gradient.Striped, gradient.Outside))
 	}
 	if inside {
@@ -204,7 +212,7 @@ func main() {
 	}
 
 	addAni(lorenz.NewLorenzAni(unitBall.Leds))
-	if !gc {
+	if !(gc || gc2) {
 	addAni(gradient.NewSpiral(smooth.Leds, 1, 1, gradient.Hard, gradient.Outside))
 	}
 	addAni(gradient.NewSpiral(smooth.Leds, 1, 1, gradient.Smooth, gradient.Outside))
@@ -216,7 +224,7 @@ func main() {
 	addAni(radar.NewRadar(smooth.Leds))
 	if p12 {
 		addAni(fifteen.NewFifteenWave(smooth.Leds))
-	} else if gc {
+	} else if (gc || gc2) {
 		addAni(ring.NewRingWave(ball))
 	} else {
 		addAni(five.NewFiveWave(smooth.Leds))

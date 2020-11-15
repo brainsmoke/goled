@@ -11,7 +11,7 @@ func NewTeensy16(filename string) (t *Teensy16, err error) {
 
 	t = new(Teensy16)
 	t.file, err = os.OpenFile(filename, os.O_RDWR, 0)
-	SetBaudrate(t.file, 12000000)
+	SetBaudrate(t.file, 1000000)
 	SetBinary(t.file)
 
 	if err != nil {

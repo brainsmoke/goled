@@ -5,8 +5,9 @@ import (
     "flag"
 	"os"
 	"post6.net/goled/model"
-//	"post6.net/goled/model/poly/minipoly"
+	"post6.net/goled/model/poly/minipoly"
 	"post6.net/goled/model/poly/greatcircles"
+	"post6.net/goled/model/poly/greatcircles2"
 	"post6.net/goled/model/poly/polyhedrone"
 	"post6.net/goled/model/poly/poly12"
 //	"post6.net/goled/model/poly/icosidode"
@@ -42,9 +43,11 @@ func writeModel(out io.Writer, leds []model.Led3D) {
 }
 
 var modelName string
+var unitScale bool
 
 func main() {
 	flag.StringVar(&modelName, "model", "polyhedrone", "model name")
+	flag.BoolVar(&unitScale, "unitscale", false, "scale model to r=1")
 	flag.Parse()
 
 	var m *model.Model3D
@@ -55,13 +58,20 @@ func main() {
 		m = poly12.Ledball()
 	} else if modelName == "greatcircles" {
 		m = greatcircles.Ledball()
-/*	} else if modelName == "minipoly" {
+	} else if modelName == "greatcircles2" {
+		m = greatcircles2.Ledball()
+	} else if modelName == "minipoly" {
 		m = minipoly.Ledball()
+/*
 	} else if modelName == "icosidode" {
 		m = icosidode.Ledball()
 	} else if modelName == "miniball" {
 		m = miniball.Ledball()
 */	}
+
+	if (unitScale) {
+		m = m.UnitScale()
+	}
 
 	writeModel(os.Stdout, m.Leds)
 }

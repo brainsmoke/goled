@@ -40,19 +40,20 @@ func NewWobble(leds []model.Led3D, whichLeds int) *Wobble {
 		wave[i] = byte(math.Pow((1+math.Sin(float64(i)/1024*2*math.Pi))/2, 2) * 255)
 	}
 
-	return &Wobble{phaseMax: 512 * 3, phase: 0, yRot: yRot, yPos: yPos, use: use, buf: buf, wave: wave}
+	return &Wobble{phaseMax: 512 * 3 * 3, phase: 0, yRot: yRot, yPos: yPos, use: use, buf: buf, wave: wave}
 }
 
 func (t *Wobble) Next() [][3]byte {
 
 	phi := float64(t.phase) / float64(t.phaseMax)
+	tide := math.Sin(phi*2*math.Pi)
 
 	for i := range t.buf {
 		if t.use[i] {
 			t.buf[i] = [3]byte{
-				t.wave[int(1024*(2+phi*4+t.yRot[i]))%1024],
-				t.wave[int(1024*(2+phi+t.yRot[i]))%1024],
-				byte(math.Pow((1+math.Cos((t.yPos[i]+phi*8)*2*math.Pi)*math.Sin(phi*2*math.Pi/3))/2, 2) * 255),
+				t.wave[int(1024*(2+phi*12+t.yRot[i]))%1024],
+				t.wave[int(1024*(2+phi*3+t.yRot[i]))%1024],
+				byte(math.Pow((1+math.Cos((t.yPos[i]+phi*24)*2*math.Pi)*tide)/2, 2) * 255),
 			}
 		} else {
 			t.buf[i] = [3]byte{0, 0, 0}
@@ -60,7 +61,7 @@ func (t *Wobble) Next() [][3]byte {
 	}
 
 	t.phase++
-	t.phase %= t.phaseMax * 3
+	t.phase %= t.phaseMax
 
 	return t.buf[:]
 }

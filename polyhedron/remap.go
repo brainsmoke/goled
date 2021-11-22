@@ -2,10 +2,17 @@ package polyhedron
 
 import (
 	"post6.net/goled/vector"
+	"fmt"
 )
 
 type RemapRoute []int
-type RemapReorientRoute [][2]int
+
+type RemapStep struct {
+
+	Source, Egress, Ingress int
+}
+
+type RemapReorientRoute []RemapStep
 
 func min(a, b int) int {
 	if a < b {
@@ -29,8 +36,7 @@ func rotateFace(orig Face, first int) Face {
 func RemapSolid(solid Solid, first int, route RemapRoute) Solid {
 	reorientRoute := make(RemapReorientRoute, len(route))
 	for i := range route {
-		reorientRoute[i][0] = route[i]
-		reorientRoute[i][1] = -1
+		reorientRoute[i] = RemapStep{ Source: -1, Egress: route[i], Ingress: -1 }
 	}
 	return RemapReorientSolid(solid, first, reorientRoute)
 }
@@ -38,15 +44,19 @@ func RemapSolid(solid Solid, first int, route RemapRoute) Solid {
 func RemapReorientSolid(solid Solid, first int, route RemapReorientRoute) Solid {
 
 	faces := make([]Face, min(len(solid.Faces), len(route)+1))
+	oldFaces := append([]Face(nil), solid.Faces...)
 	points := []vector.Vector3{}
 
+	face_inv_mapping := make([]int, len(solid.Faces))
 	face_mapping := make([]int, len(solid.Faces))
 	point_mapping := make([]int, len(solid.Points))
 
 	for i := range face_mapping {
 		face_mapping[i] = -1
 	}
-
+	for i := range face_inv_mapping {
+		face_inv_mapping[i] = -1
+	}
 	for i := range point_mapping {
 		point_mapping[i] = -1
 	}
@@ -55,20 +65,27 @@ func RemapReorientSolid(solid Solid, first int, route RemapReorientRoute) Solid 
 
 	for i := range faces {
 
-		faces[i] = solid.Faces[current]
-		if face_mapping[current] != -1 {
+		faces[i] = oldFaces[current]
+		if face_inv_mapping[current] != -1 {
+			fmt.Print("%d, %d\n", face_inv_mapping[current], i)
 			panic("overlap in remapping");
 		}
-		face_mapping[current] = i
+		face_inv_mapping[current] = i
+		face_mapping[i] = current
 
 		if i < len(route) {
-			egress, ingress := route[i][0], route[i][1]
-			next := solid.Faces[current].Neighbours[egress]
-			if ingress != -1 {
-				for j,n := range solid.Faces[next].Neighbours {
+			if route[i].Source > i {
+				panic("bad remap route")
+			}
+			if route[i].Source > -1 {
+				current = face_mapping[route[i].Source]
+			}
+			next := oldFaces[current].Neighbours[route[i].Egress]
+			if route[i].Ingress != -1 {
+				for j,n := range oldFaces[next].Neighbours {
 					if n == current {
-						firstEdge := (j - ingress + len(solid.Faces[next].Neighbours)) % len(solid.Faces[next].Neighbours)
-						solid.Faces[next] = rotateFace(solid.Faces[next], firstEdge)
+						firstEdge := (j - route[i].Ingress + len(oldFaces[next].Neighbours)) % len(oldFaces[next].Neighbours)
+						oldFaces[next] = rotateFace(oldFaces[next], firstEdge)
 						break
 					}
 				}
@@ -84,7 +101,7 @@ func RemapReorientSolid(solid Solid, first int, route RemapReorientRoute) Solid 
 		faces[i].Neighbours = append([]int{}, faces[i].Neighbours...)
 		for j, k := range faces[i].Neighbours {
 
-			faces[i].Neighbours[j] = face_mapping[k]
+			faces[i].Neighbours[j] = face_inv_mapping[k]
 		}
 		for j, k := range faces[i].Polygon {
 

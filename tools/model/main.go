@@ -10,6 +10,7 @@ import (
 	"post6.net/goled/model/poly/greatcircles2"
 	"post6.net/goled/model/poly/polyhedrone"
 	"post6.net/goled/model/poly/poly12"
+	"post6.net/goled/model/poly/aluball"
 //	"post6.net/goled/model/poly/icosidode"
 //	"post6.net/goled/model/poly/miniball"
     "io"
@@ -62,6 +63,8 @@ func main() {
 		m = greatcircles2.Ledball()
 	} else if modelName == "minipoly" {
 		m = minipoly.Ledball()
+	} else if modelName == "aluball" {
+		m = aluball.Ledball()
 /*
 	} else if modelName == "icosidode" {
 		m = icosidode.Ledball()

@@ -35,6 +35,7 @@ import (
 	"post6.net/goled/model/poly/poly12"
 	"post6.net/goled/model/poly/greatcircles"
 	"post6.net/goled/model/poly/greatcircles2"
+	"post6.net/goled/model/poly/aluball"
 	"time"
 )
 
@@ -75,7 +76,7 @@ var gamma, brightness float64
 var fps, switchTime, blendTime int
 var ledOrder led.LedOrder
 //var ambient bool
-var mini, p12, gc, gc2 bool
+var mini, p12, gc, gc2, alu bool
 var animations = []ani.Animation(nil)
 
 func addAni(a ani.Animation) {
@@ -90,6 +91,7 @@ func init() {
 //	flag.BoolVar(&ambient, "ambient", false, "don't load bright animations")
 	flag.BoolVar(&mini, "mini", false, "use small polyhedron model")
 	flag.BoolVar(&p12, "poly12", false, "use new polyhedron model")
+	flag.BoolVar(&alu, "alu", false, "use aluball model")
 	flag.BoolVar(&gc, "greatcircles0", false, "use old greatcircles model")
 	flag.BoolVar(&gc2, "greatcircles", false, "use new greatcircles model")
 	ledOrder = led.RGB
@@ -130,6 +132,10 @@ func main() {
 	} else if gc {
 		ball = greatcircles.Ledball()
 		inside = false
+		neighbours = false
+	} else if alu {
+		ball = aluball.Ledball()
+		inside = true
 		neighbours = false
 	} else {
 		ball = polyhedrone.Ledball()

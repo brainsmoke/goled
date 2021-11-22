@@ -11,6 +11,7 @@ import (
 	"post6.net/goled/model/poly/polyhedrone"
 	"post6.net/goled/model/poly/poly12"
 	"post6.net/goled/model/poly/minipoly"
+	"post6.net/goled/model/poly/aluball"
 )
 
 func writeMap(vmap []int, width, height int) {
@@ -53,6 +54,8 @@ func main() {
 		m = greatcircles2.Ledball()
 	} else if modelName == "minipoly" {
 		m = minipoly.Ledball()
+	} else if modelName == "aluball" {
+		m = aluball.Ledball()
 /*	} else if modelName == "icosidode" {
 		m = icosidode.Ledball()
 	} else if modelName == "miniball" {

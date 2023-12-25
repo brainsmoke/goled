@@ -17,9 +17,12 @@ import (
 func writeMap(vmap []int, width, height int) {
 
 	for y:=0; y<height; y++ {
-		fmt.Printf("\t")
+		fmt.Printf("\t\t")
 		for x:=0; x<width; x++ {
-			fmt.Printf("%4d,", vmap[y*width+x])
+			fmt.Printf("%4d", vmap[y*width+x])
+			if x+1 != width || y+1 != height {
+				fmt.Printf(",")
+			}
 		}
 		fmt.Printf("\n")
 	}
@@ -27,10 +30,14 @@ func writeMap(vmap []int, width, height int) {
 
 func writeFloatarray(arr []float64) {
 
+	fmt.Printf("\t\t")
+    x := ""
 	for _,v := range arr {
-		fmt.Printf("%f, ", v)
-		fmt.Printf(",\n")
+		fmt.Printf(x)
+		fmt.Printf("%f", v)
+		x = ", "
 	}
+	fmt.Printf("\n")
 }
 
 var modelName string
@@ -72,6 +79,15 @@ func main() {
 
 	vmap, sinY := projection.Voronoi(width, height, points)
 
+
+	fmt.Printf("{\n")
+	fmt.Printf("\t\"width\": %d,\n", width)
+	fmt.Printf("\t\"height\": %d,\n", height)
+	fmt.Printf("\t\"voronoi\": [\n")
 	writeMap(vmap, width, height)
+	fmt.Printf("\t],\n")
+	fmt.Printf("\t\"weighting\": [\n")
 	writeFloatarray(sinY)
+	fmt.Printf("\t]\n")
+	fmt.Printf("}\n")
 }

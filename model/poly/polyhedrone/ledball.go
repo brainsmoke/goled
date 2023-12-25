@@ -164,8 +164,8 @@ func ledGroups(leds []model.Led3D, solid polyhedron.Solid) map[string][]int {
 
 		f := l.Face
 		groups["icosaedron"][i] = icosaedron[f]
-		groups["dodecahedron"][i] = f
-		groups["faces"][i] = dodecahedron[f]
+		groups["dodecahedron"][i] = dodecahedron[f]
+		groups["faces"][i] = f
 		if i%5 == 0 {
 			groups["rhomb"][i] = icosaedron[f]
 		} else if i%5 == 2 {
